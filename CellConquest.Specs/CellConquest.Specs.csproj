@@ -24,7 +24,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Feature" />
       <Folder Include="Hooks" />
+      <Folder Include="Steps" />
     </ItemGroup>
 
     <ItemGroup>
