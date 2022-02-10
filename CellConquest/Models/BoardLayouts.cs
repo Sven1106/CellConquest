@@ -8,7 +8,7 @@ public static class Maps
     {
         new(1, 1),
         new(5, 1),
-        new(8, 8),
+        new(9, 7),
         new(3, 4),
         new(8, 9),
         new(1, 9)

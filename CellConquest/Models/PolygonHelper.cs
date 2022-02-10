@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
@@ -53,33 +53,6 @@ public static class PolygonHelper
         return slopeOfSegment;
     }
 
-    // Given three collinear points p, q, r,
-    // the function checks if point q lies
-    // on line segment 'pr'
-    public static bool IsPointOnSegment3(PointF q, LineSegment pr)
-    {
-        if (q.X <= Math.Max(pr.Point1.X, pr.Point2.X) && q.X >= Math.Min(pr.Point1.X, pr.Point2.X) &&
-            q.Y <= Math.Max(pr.Point1.Y, pr.Point2.Y) && q.Y >= Math.Min(pr.Point1.Y, pr.Point2.Y))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    public static bool IsPointOnSegment(PointF q, LineSegment pr)
-    {
-        var AB = Math.Sqrt((pr.Point2.X - pr.Point1.X) * (pr.Point2.X - pr.Point1.X) +
-                           (pr.Point2.Y - pr.Point1.Y) * (pr.Point2.Y - pr.Point1.Y));
-        var AP = Math.Sqrt((q.X - pr.Point1.X) * (q.X - pr.Point1.X) + (q.Y - pr.Point1.Y) * (q.Y - pr.Point1.Y));
-        var PB = Math.Sqrt((pr.Point2.X - q.X) * (pr.Point2.X - q.X) + (pr.Point2.Y - q.Y) * (pr.Point2.Y - q.Y));
-        return AB == AP + PB;
-    }
-
-
-    // Given two line segments,
-    // the function checks if line segment 1 lies
-    // on line segment 2
     public static bool IsSegmentOnSegment(LineSegment segment1, LineSegment segment2)
     {
         var areSegmentsCollinear = GetSlopeOfSegment(segment1) == GetSlopeOfSegment(segment2);
@@ -104,102 +77,112 @@ public static class PolygonHelper
         return false;
     }
 
-    public static bool IsPointOnPolygon(PointF point, PointF[] polygon)
+    public static bool IsSegmentOnPolygon(LineSegment wall, PointF[] polygon)
     {
-        var isPointOnSegment = false;
+        var isSegmentOnPolygon = false;
         for (var i = 0; i < polygon.Length; i++) //Check if wall is on any polygon segments
         {
             var next = (i + 1) % polygon.Length;
             var polygonSegment = new LineSegment(polygon[i], polygon[next]);
 
-            isPointOnSegment = IsPointOnSegment(point, polygonSegment);
-            if (isPointOnSegment)
+            isSegmentOnPolygon = IsSegmentOnSegment(wall, polygonSegment);
+            if (isSegmentOnPolygon)
             {
                 break;
             }
         }
 
-        return isPointOnSegment;
+        return isSegmentOnPolygon;
     }
 
-
-    // The function that returns true if
-    // line segment 'segment1' and 'segment2' intersect.
-    public static bool DoesSegmentsIntersect(LineSegment segment1, LineSegment segment2)
+    public static bool IsPointInPolygon(PointF point, PointF[] polygon)
     {
-        // Find the four orientations needed for
-        // general and special cases
-        int o1 = GetOrientation(segment1.Point1, segment1.Point2, segment2.Point1);
-        int o2 = GetOrientation(segment1.Point1, segment1.Point2, segment2.Point2);
-        int o3 = GetOrientation(segment2.Point1, segment2.Point2, segment1.Point1);
-        int o4 = GetOrientation(segment2.Point1, segment2.Point2, segment1.Point2);
+        // Get the angle between the point and the
+        // first and last vertices.
+        var max_point = polygon.Length - 1;
+        var total_angle = GetAngle(
+            polygon[max_point].X, polygon[max_point].Y,
+            point.X, point.Y,
+            polygon[0].X, polygon[0].Y);
 
-        // General case
-        if (o1 != o2 && o3 != o4)
+        // Add the angles from the point
+        // to each other pair of vertices.
+        for (var i = 0; i < max_point; i++)
         {
-            return true;
+            total_angle += GetAngle(
+                polygon[i].X, polygon[i].Y,
+                point.X, point.Y,
+                polygon[i + 1].X, polygon[i + 1].Y);
         }
 
-        // Special Cases
-        // segment1.Point1, segment1.Point2 and segment2.Point1 are collinear and
-        // segment2.Point1 lies on segment segment1
-        if (o1 == 0 && IsPointOnSegment(segment2.Point1, segment1))
-        {
-            return true;
-        }
-
-        // segment1.Point1, segment1.Point2 and segment2.Point1 are collinear and
-        // segment2.Point2 lies on segment segment1
-        if (o2 == 0 && IsPointOnSegment(segment2.Point2, segment1))
-        {
-            return true;
-        }
-
-        // segment2.Point1, segment2.Point2 and segment1.Point1 are collinear and
-        // segment1.Point1 lies on segment segment2
-        if (o3 == 0 && IsPointOnSegment(segment1.Point1, segment2))
-        {
-            return true;
-        }
-
-        // segment2.Point1, segment2.Point2 and segment1.Point2 are collinear and
-        // segment1.Point2 lies on segment segment2
-        if (o4 == 0 && IsPointOnSegment(segment1.Point2, segment2))
-        {
-            return true;
-        }
-
-        // Doesn't fall in any of the above cases
-        return false;
+        // The total angle should be 2 * PI or -2 * PI if
+        // the point is in the polygon and close to zero
+        // if the point is outside the polygon.
+        return (Math.Abs(total_angle) > 1);
     }
 
-    public static bool IsPointInPolygon(PointF pnt, PointF[] polygon)
+    // Return the angle ABC.
+    // Return a value between PI and -PI.
+    // Note that the value is the opposite of what you might
+    // expect because Y coordinates increase downward.
+    public static float GetAngle(float Ax, float Ay, float Bx, float By, float Cx, float Cy)
     {
-        var v = GetEnlargedPolygon(polygon, 0.01f);
-        var inside = false;
-        var len = v.Length;
-        for (var i = 0; i < len; i++)
-        {
-            if (Intersects(v[i], v[(i + 1) % len], pnt))
-            {
-                inside = !inside;
-            }
-        }
+        // Get the dot product.
+        var dot_product = DotProduct(Ax, Ay, Bx, By, Cx, Cy);
 
-        return inside;
+        // Get the cross product.
+        var cross_product = CrossProductLength(Ax, Ay, Bx, By, Cx, Cy);
+
+        // Calculate the angle.
+        return (float)Math.Atan2(cross_product, dot_product);
     }
 
+
+    // Return the cross product AB x BC.
+    // The cross product is a vector perpendicular to AB
+    // and BC having length |AB| * |BC| * Sin(theta) and
+    // with direction given by the right-hand rule.
+    // For two vectors in the X-Y plane, the result is a
+    // vector with X and Y components 0 so the Z component
+    // gives the vector's length and direction.
+    public static float CrossProductLength(float Ax, float Ay, float Bx, float By, float Cx, float Cy)
+    {
+        // Get the vectors' coordinates.
+        var BAx = Ax - Bx;
+        var BAy = Ay - By;
+        var BCx = Cx - Bx;
+        var BCy = Cy - By;
+
+        // Calculate the Z coordinate of the cross product.
+        return (BAx * BCy - BAy * BCx);
+    }
+
+    // Return the dot product AB · BC.
+    // Note that AB · BC = |AB| * |BC| * Cos(theta).
+    private static float DotProduct(float Ax, float Ay, float Bx, float By, float Cx, float Cy)
+    {
+        // Get the vectors' coordinates.
+        var BAx = Ax - Bx;
+        var BAy = Ay - By;
+        var BCx = Cx - Bx;
+        var BCy = Cy - By;
+
+        // Calculate the dot product.
+        return (BAx * BCx + BAy * BCy);
+    }
+
+    // Return points representing an enlarged polygon.
     public static PointF[] GetEnlargedPolygon(PointF[] old_points, float offset)
     {
         List<PointF> enlarged_points = new();
-        int num_points = old_points.Length;
-        for (int j = 0; j < num_points; j++)
+        var num_points = old_points.Length;
+        for (var j = 0; j < num_points; j++)
         {
             // Find the new location for point j.
             // Find the points before and after j.
-            int i = (j - 1);
+            var i = (j - 1);
             if (i < 0) i += num_points;
-            int k = (j + 1) % num_points;
+            var k = (j + 1) % num_points;
 
             // Move the points by the offset.
             Vector2 v1 = new(
@@ -242,46 +225,9 @@ public static class PolygonHelper
         return enlarged_points.ToArray();
     }
 
-    public static bool IsSegmentOnPolygon(LineSegment wall, PointF[] polygon)
-    {
-        var isSegmentOnPolygon = false;
-        for (var i = 0; i < polygon.Length; i++) //Check if wall is on any polygon segments
-        {
-            var next = (i + 1) % polygon.Length;
-            var polygonSegment = new LineSegment(polygon[i], polygon[next]);
-
-            isSegmentOnPolygon = IsSegmentOnSegment(wall, polygonSegment);
-            if (isSegmentOnPolygon)
-            {
-                break;
-            }
-        }
-
-        return isSegmentOnPolygon;
-    }
-
-
-    // To find orientation of ordered triplet (p, q, r).
-    // The function returns following values
-    // 0 --> p, q and r are collinear
-    // 1 --> Clockwise
-    // 2 --> Counterclockwise
-    private static int GetOrientation(PointF p, PointF q, PointF r)
-    {
-        var val = (q.Y - p.Y) * (r.X - q.X) -
-                  (q.X - p.X) * (r.Y - q.Y);
-
-        if (val == 0)
-        {
-            return 0; // collinear
-        }
-
-        return val > 0 ? 1 : 2; // clock or counterclock wise
-    }
-
     // Find the point of intersection between
     // the lines p1 --> p2 and p3 --> p4.
-    private static void FindIntersection(
+    public static void FindIntersection(
         PointF p1, PointF p2, PointF p3, PointF p4,
         out bool lines_intersect, out bool segments_intersect,
         out PointF intersection,
@@ -308,9 +254,9 @@ public static class PolygonHelper
             // The lines are parallel (or close enough to it).
             lines_intersect = false;
             segments_intersect = false;
-            intersection = new(float.NaN, float.NaN);
-            close_p1 = new(float.NaN, float.NaN);
-            close_p2 = new(float.NaN, float.NaN);
+            intersection = new PointF(float.NaN, float.NaN);
+            close_p1 = new PointF(float.NaN, float.NaN);
+            close_p2 = new PointF(float.NaN, float.NaN);
             return;
         }
 
@@ -321,7 +267,7 @@ public static class PolygonHelper
             / -denominator;
 
         // Find the point of intersection.
-        intersection = new(p1.X + dx12 * t1, p1.Y + dy12 * t1);
+        intersection = new PointF(p1.X + dx12 * t1, p1.Y + dy12 * t1);
 
         // The segments intersect if t1 and t2 are between 0 and 1.
         segments_intersect =
@@ -347,26 +293,7 @@ public static class PolygonHelper
             t2 = 1;
         }
 
-        close_p1 = new(p1.X + dx12 * t1, p1.Y + dy12 * t1);
-        close_p2 = new(p3.X + dx34 * t2, p3.Y + dy34 * t2);
-    }
-
-    private static bool Intersects(PointF A, PointF B, PointF P)
-    {
-        if (A.Y > B.Y)
-            return Intersects(B, A, P);
-
-        if (P.Y == A.Y || P.Y == B.Y)
-            P.Y += 0.0001f;
-
-        if (P.Y > B.Y || P.Y < A.Y || P.X >= Math.Max(A.X, B.X))
-            return false;
-
-        if (P.X < Math.Min(A.X, B.X))
-            return true;
-
-        var red = (P.Y - A.Y) / (P.X - A.X);
-        var blue = (B.Y - A.Y) / (B.X - A.X);
-        return red >= blue;
+        close_p1 = new PointF(p1.X + dx12 * t1, p1.Y + dy12 * t1);
+        close_p2 = new PointF(p3.X + dx34 * t2, p3.Y + dy34 * t2);
     }
 }

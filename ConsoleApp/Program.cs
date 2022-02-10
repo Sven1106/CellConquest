@@ -5,7 +5,7 @@ using System.Linq;
 using CellConquest.Models;
 using PointF = System.Drawing.PointF;
 
-var board = new Board(Maps.Mario);
+var board = new Board(Maps.Test);
 const int width = 1000;
 const int height = 1000;
 const int scale = 35;
@@ -13,7 +13,6 @@ const int scale = 35;
 
 // Create a drawing target
 Bitmap bitmap = new(width, height);
-const string path = @"C:\Users\Steven\Documents\repos\CellConquest";
 
 var graphics = Graphics.FromImage(bitmap);
 var outline = board.Outline.Select(point => new PointF(point.X * scale, point.Y * scale)).ToArray();
@@ -41,5 +40,5 @@ foreach (var cell in board.Cells)
 
 graphics.DrawPolygon(Pens.Black, outline);
 // Save
-bitmap.Save(Path.Combine(path, "img.png"));
+bitmap.Save(Path.Combine(Directory.GetCurrentDirectory(), "img.png"));
 Console.WriteLine("bordlayout");
