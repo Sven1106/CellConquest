@@ -2,23 +2,23 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net6.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
         <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CellConquest\CellConquest.csproj" />
+        <ProjectReference Include="..\CellConquest\CellConquest.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12" />
-      <PackageReference Include="EpForceDirectedGraph.cs" Version="1.0.0" />
-      <PackageReference Include="Microsoft.Graphics.Win2D" Version="0.8.2.23" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-      <PackageReference Include="QuikGraph.Data" Version="2.3.0" />
-      <PackageReference Include="QuikGraph.Graphviz" Version="2.3.1" />
+        <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12"/>
+        <PackageReference Include="EpForceDirectedGraph.cs" Version="1.0.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
+        <PackageReference Include="QuikGraph.Data" Version="2.3.0"/>
+        <PackageReference Include="QuikGraph.Graphviz" Version="2.3.1"/>
+
     </ItemGroup>
 
 </Project>
