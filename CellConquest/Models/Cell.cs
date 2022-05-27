@@ -1,11 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace CellConquest.Models;
 
 public class Cell
 {
-    public Guid Id { get; } = Guid.NewGuid();
-    public string ConqueredBy { get; set; } = StaticGameValues.NoOne;
-    public List<Membrane> Membranes { get; } = new();
+    public string Id { get; }
+    public string ConqueredBy { get; private set; }
+
+    public bool IsConquered => ConqueredBy != StaticGameValues.NoOne;
+
+    public Cell(string id, string conqueredBy = StaticGameValues.NoOne)
+    {
+        Id = id;
+        ConqueredBy = conqueredBy;
+    }
+
+    public void Conquer(string playerId)
+    {
+        //  Check if cell has already been conquered.
+        if (IsConquered)
+        {
+            throw new Exception($"Cell with id: {Id} is already conquered");
+        }
+
+        ConqueredBy = playerId;
+        // Emit Cell conquered
+    }
 }

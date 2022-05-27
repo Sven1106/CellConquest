@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellConquest", "CellConques
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{8C8A758A-4F77-47E2-A7FE-1C6553C5E8DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellConquest.Unittests", "CellConquest.Unittests\CellConquest.Unittests.csproj", "{4265E7DB-0ACE-4178-8A32-884572D72B3B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{8C8A758A-4F77-47E2-A7FE-1C6553C5E8DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C8A758A-4F77-47E2-A7FE-1C6553C5E8DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C8A758A-4F77-47E2-A7FE-1C6553C5E8DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4265E7DB-0ACE-4178-8A32-884572D72B3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4265E7DB-0ACE-4178-8A32-884572D72B3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4265E7DB-0ACE-4178-8A32-884572D72B3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4265E7DB-0ACE-4178-8A32-884572D72B3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

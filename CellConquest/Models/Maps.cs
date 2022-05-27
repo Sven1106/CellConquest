@@ -8,11 +8,14 @@ public static class Maps
     {
         new(1, 1),
         new(5, 1),
-        new(9, 7),
+        new(7, 4),
+        new(9, 4),
+        new(10, 1),
         new(3, 4),
         new(8, 9),
         new(1, 9)
     };
+
     public static PointF[] Test2 { get; } =
     {
         new(0, 2),
@@ -23,6 +26,7 @@ public static class Maps
         new(3, 3),
         new(1, 3)
     };
+
     public static PointF[] Test3 { get; } =
     {
         new(0, 0),
@@ -37,10 +41,10 @@ public static class Maps
 
     public static PointF[] Diamond { get; } =
     {
-        new(2, 0),
-        new(4, 2),
-        new(2, 4),
-        new(0, 2),
+        new(4, 0),
+        new(8, 4),
+        new(4, 8),
+        new(0, 4),
     };
 
     public static PointF[] TwoByTwo { get; } =
