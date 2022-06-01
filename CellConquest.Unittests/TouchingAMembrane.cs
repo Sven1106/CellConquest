@@ -13,17 +13,17 @@ public class TouchingAMembrane
         //GIVEN
         var gameConfig = new GameConfig("Test1", "svend", Maps.TwoByTwo);
         var game = new Game(gameConfig);
-        game.AddPlayer("steven");
-        game.Start();
+        GameService.AddPlayerToGame(game, "steven");
+        game = game with { CurrentPlayerTurn = "steven" };
         //WHEN
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));
-        game.TouchMembrane("steven", "2");
+        game = GameService.TouchMembraneOnGame(game, "steven", "2");
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));
-        game.TouchMembrane("svend", "3");
+        game = GameService.TouchMembraneOnGame(game, "svend", "3");
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));
-        game.TouchMembrane("svend", "8");
+        game = GameService.TouchMembraneOnGame(game, "svend", "8");
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));
-        game.TouchMembrane("svend", "7");
+        game = GameService.TouchMembraneOnGame(game, "svend", "7");
         //THEN
 
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));

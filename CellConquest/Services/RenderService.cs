@@ -25,10 +25,10 @@ public static class RenderService
         graphics.DrawPolygon(Pens.Red, scaledOutline);
         foreach (var cell in board.Cells)
         {
-            var cellMembranes = board.CellMembranes.Where(x => x.Cell.Id == cell.Id);
+            var cellMembranes = board.CellMembranes.Where(x => x.CellId == cell.Id);
             foreach (var cellMembrane in cellMembranes)
             {
-                var membrane = board.Membranes.FirstOrDefault(x => x.Id == cellMembrane.Membrane.Id);
+                var membrane = board.Membranes.FirstOrDefault(x => x.Id == cellMembrane.MembraneId);
                 var color = membrane.TouchedBy switch
                 {
                     StaticGameValues.Board => new Pen(Color.Black, 3),

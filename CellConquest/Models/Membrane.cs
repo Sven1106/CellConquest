@@ -2,13 +2,13 @@ using System;
 
 namespace CellConquest.Models;
 
-public class Membrane
+public record Membrane
 {
-    public string Id { get; }
-    public string TouchedBy { get; private set; } = StaticGameValues.NoOne;
+    public string Id { get; init; }
+    public string TouchedBy { get; init; } = StaticGameValues.NoOne;
     public bool IsTouched => TouchedBy != StaticGameValues.NoOne;
 
-    public Wall Wall { get; }
+    public Wall Wall { get; init; }
 
     public Membrane(string id, Wall wall, bool shouldBeMarkedAsOutline)
     {
@@ -18,18 +18,5 @@ public class Membrane
         {
             TouchedBy = StaticGameValues.Board;
         }
-    }
-
-    public void Touch(string playerName)
-    {
-        //  Check if membrane has already been touched.
-        if (IsTouched)
-        {
-            throw new Exception($"Membrane with id: {Id} is already touched");
-        }
-
-        TouchedBy = playerName;
-
-        // Emit MembraneTouched
     }
 }

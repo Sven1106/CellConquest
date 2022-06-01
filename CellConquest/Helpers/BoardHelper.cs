@@ -196,11 +196,11 @@ public static class BoardHelper
                         newMembranes.Add(membrane);
                     }
 
-                    newCellMembranes.Add(new CellMembrane(newCell, membrane));
+                    newCellMembranes.Add(new CellMembrane(newCell.Id, membrane.Id));
                 }
 
                 if (newCellMembranes.All(cellMembrane =>
-                        membranes.Concat(newMembranes).FirstOrDefault(x => x.Id == cellMembrane.Membrane.Id)
+                        membranes.Concat(newMembranes).FirstOrDefault(x => x.Id == cellMembrane.MembraneId)
                             .TouchedBy ==
                         StaticGameValues.Board)
                    )
