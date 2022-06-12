@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using CellConquest.Exceptions;
 using CellConquest.Models;
 
 namespace CellConquest.Services;
@@ -12,41 +12,55 @@ public static class GameService
 
     public static Game AddPlayerToGame(Game game, string playerName)
     {
-        if (game.GameState != GameState.WaitForPlayers) // TODO Generalize Method guards.
+        if (game.GameState != GameState.WaitForPlayers)
         {
-            throw new Exception("Player can only join a game Setup");
+            throw new InvalidGameStateException("Player can only be added in setup phase");
         }
 
         if (StaticGameValues.Contains(playerName))
         {
-            throw new Exception("Not a valid player name");
+            throw new InvalidPlayerNameException("Not a valid player name");
         }
 
-        if (game.Players.Exists(x => x == playerName))
+        if (game.Players.Contains(playerName))
         {
-            throw new Exception("Player with that name already exists");
+            throw new PlayerAlreadyExistException("Player with that name already exists");
         }
 
-        game.Players.Add(playerName);
-        return game;
+        return game with
+        {
+            Players = game.Players.Add(playerName)
+        };
     }
 
     public static Game RemovePlayerFromGame(Game game, string playerName)
     {
-        if (game.Players.Exists(x => x == playerName) == false)
+        if (game.GameState != GameState.WaitForPlayers)
         {
-            throw new Exception("Player with that name doesn't exist");
+            throw new InvalidGameStateException("Player can only be removed in setup phase");
         }
 
-        game.Players.Remove(playerName);
-        return game;
+        if (game.Players.Contains(playerName) == false)
+        {
+            throw new PlayerNotFoundException("Player with that name not found");
+        }
+
+        if (game.Owner == playerName)
+        {
+            throw new OwnerCantBeRemovedException("Owner can't be removed from the game");
+        }
+
+        return game with
+        {
+            Players = game.Players.Remove(playerName)
+        };
     }
 
     public static Game StartGame(Game game)
     {
         if (game.Players.Count <= 1)
         {
-            throw new Exception("It needs at least two players to start a game");
+            throw new InsufficientPlayersException("It needs at least two players to start a game");
         }
 
         Random random = new();
@@ -56,8 +70,6 @@ public static class GameService
             CurrentPlayerTurn = game.Players[randomPlayerIndex],
             GameState = GameState.Playing
         };
-        // Emit GameStartedEvent
-        // Emit PlayerTurnChangedEvent
     }
 
     #endregion
@@ -68,54 +80,55 @@ public static class GameService
     {
         if (game.CurrentPlayerTurn != playerName)
         {
-            throw new Exception($"It's not {playerName}'s turn");
+            throw new IncorrectPlayerTurnException($"It's not {playerName}'s turn");
         }
 
         var membrane = game.Board.Membranes.FirstOrDefault(x => x.Id == membraneId);
         if (membrane is null)
         {
-            throw new Exception($"Membrane with id: {membraneId} doesn't exist");
+            throw new MembraneNotFoundException($"Membrane with id: {membraneId} doesn't exist");
         }
 
         if (membrane.IsTouched)
         {
-            throw new Exception($"Membrane with id: {membrane.Id} is already touched");
+            throw new MembraneAlreadyTouchedException($"Membrane with id: {membrane.Id} is already touched");
         }
-
-        var touchedMembrane = membrane with
-        {
-            TouchedBy = playerName
-        };
 
         game = game with
         {
             Board = game.Board with
             {
-                Membranes = game.Board.Membranes.Replace(membrane, touchedMembrane)
+                Membranes = game.Board.Membranes.Replace(membrane, membrane with
+                {
+                    TouchedBy = playerName
+                })
             }
         };
 
-        // Check if membrane is connected to Cells with no untouched membranes and mark the cells as conquered
-
-        Cell ConquerCell(Cell cell, string playerId)
-            => cell.IsConquered ? throw new Exception($"Cell with id: {cell.Id} is already conquered") : cell with { ConqueredBy = playerId };
-
-
         var conquerableCellsConnectedToMembraneId = GetConquerableCellsConnectedToMembraneId(game.Board.Cells, game.Board.Membranes, game.Board.CellMembranes, membraneId);
-        var conqueredCells = conquerableCellsConnectedToMembraneId.Select(cell => ConquerCell(cell, playerName)).ToImmutableList();
-        game = game with
+        if (conquerableCellsConnectedToMembraneId.Any())
         {
-            Board = game.Board with { Cells = game.Board.Cells.RemoveRange(conquerableCellsConnectedToMembraneId).AddRange(conqueredCells) }
-        };
-        if (conqueredCells.Any())
-        {
-            return game;
+            return game with
+            {
+                Board = game.Board with
+                {
+                    Cells = game.Board.Cells
+                        .Select(cell =>
+                            conquerableCellsConnectedToMembraneId
+                                .Any(conquerableCell => conquerableCell.Id == cell.Id)
+                                ? cell  with
+                                {
+                                    ConqueredBy = playerName
+                                }
+                                : cell
+                        )
+                        .ToImmutableList()
+                }
+            };
         }
 
         var nextPlayerTurn = game.Players[(game.Players.IndexOf(playerName) + 1) % game.Players.Count];
-        game = game with { CurrentPlayerTurn = nextPlayerTurn };
-        return game;
-        // Emit CurrentPlayerTurnChanged
+        return game with { CurrentPlayerTurn = nextPlayerTurn };
     }
 
     #endregion

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using CellConquest.DTOs;
 
@@ -12,7 +13,7 @@ public record Game
     public Board Board { get; init; }
     public string Owner { get; init; }
     public string CurrentPlayerTurn { get; init; } = StaticGameValues.NoOne;
-    public List<string> Players { get; init; } = new();
+    public IImmutableList<string> Players { get; init; } = ImmutableList<string>.Empty;
 
     public Game(GameConfig gameConfig)
     {
@@ -20,6 +21,6 @@ public record Game
         Id = gameId;
         Board = new Board(pointFs);
         Owner = owner;
-        Players.Add(owner);
+        Players = Players.Add(owner);
     }
 }
