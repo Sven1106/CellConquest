@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CellConquest\CellConquest.csproj" />
+        <ProjectReference Include="..\CellConquest.Domain\CellConquest.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>

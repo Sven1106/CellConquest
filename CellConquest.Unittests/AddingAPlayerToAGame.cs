@@ -1,17 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using CellConquest.DTOs;
-using CellConquest.Exceptions;
-using CellConquest.Models;
-using CellConquest.Services;
+using CellConquest.Domain.Entities;
+using CellConquest.Domain.Exceptions;
+using CellConquest.Domain.Helpers;
+using CellConquest.Domain.Models;
+using CellConquest.Domain.Services;
+using CellConquest.Domain.ValueObjects;
 using Xunit;
 
 namespace CellConquest.Unittests;
 
 public class AddingAPlayerToAGame
 {
-    private PointF[] TwoByTwo { get; } = { new(0, 0), new(2, 0), new(2, 2), new(0, 2), };
+    private PointF[] TwoByTwo { get; } = { new(0, 0), new(2, 0), new(2, 2), new(0, 2) };
 
     [Fact]
     public void ShouldFailIfPlayerAlreadyExist()
@@ -19,7 +22,9 @@ public class AddingAPlayerToAGame
         const string playerName = "svend";
         var gameConfig = new GameConfig("Test", playerName, TwoByTwo);
         var game = new Game(gameConfig);
-        Assert.Throws<PlayerAlreadyExistException>(() => GameService.AddPlayerToGame(game, playerName));
+
+
+        Assert.Throws<PlayerAlreadyExistException>(() => GameHelper.AddPlayerToGame(game, playerName));
     }
 
     [Fact]
@@ -31,7 +36,7 @@ public class AddingAPlayerToAGame
         var gameStates = Enum.GetValues(typeof(GameState)).Cast<GameState>();
         foreach (var gameState in gameStates.Where(x => x != GameState.WaitForPlayers))
         {
-            Assert.Throws<InvalidGameStateException>(() => GameService.AddPlayerToGame(game with { GameState = gameState }, playerName));
+            Assert.Throws<InvalidGameStateException>(() => GameHelper.AddPlayerToGame(game with { GameState = gameState }, playerName));
         }
     }
 
@@ -40,8 +45,8 @@ public class AddingAPlayerToAGame
     {
         var gameConfig = new GameConfig("Test", "svend", TwoByTwo);
         var game = new Game(gameConfig);
-        Assert.Throws<InvalidPlayerNameException>(() => GameService.AddPlayerToGame(game, StaticGameValues.Board));
-        Assert.Throws<InvalidPlayerNameException>(() => GameService.AddPlayerToGame(game, StaticGameValues.NoOne));
+        Assert.Throws<InvalidPlayerNameException>(() => GameHelper.AddPlayerToGame(game, StaticGameValues.Board));
+        Assert.Throws<InvalidPlayerNameException>(() => GameHelper.AddPlayerToGame(game, StaticGameValues.NoOne));
     }
 
     [Fact]
@@ -50,7 +55,7 @@ public class AddingAPlayerToAGame
         const string playerName = "steven";
         var gameConfig = new GameConfig("Test", "svend", TwoByTwo);
         var game = new Game(gameConfig);
-        game = GameService.AddPlayerToGame(game, playerName);
-        Assert.Contains(playerName, game.Players);
+        game = GameHelper.AddPlayerToGame(game, playerName);
+        Assert.Contains<PlayerName>(playerName, game.Players);
     }
 }

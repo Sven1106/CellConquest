@@ -1,5 +1,6 @@
 using System.Drawing;
-using CellConquest.Models;
+using CellConquest.Domain.Models;
+using CellConquest.Domain.ValueObjects;
 using Xunit;
 
 namespace CellConquest.Unittests;

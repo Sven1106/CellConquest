@@ -1,16 +1,19 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Linq;
-using CellConquest.DTOs;
-using CellConquest.Exceptions;
-using CellConquest.Models;
-using CellConquest.Services;
+using CellConquest.Domain.Entities;
+using CellConquest.Domain.Exceptions;
+using CellConquest.Domain.Helpers;
+using CellConquest.Domain.Models;
+using CellConquest.Domain.Services;
+using CellConquest.Domain.ValueObjects;
 using Xunit;
 
 namespace CellConquest.Unittests;
 
 public class TouchingAMembrane
 {
-    private PointF[] TwoByTwo { get; } = { new(0, 0), new(2, 0), new(2, 2), new(0, 2), };
+    private PointF[] TwoByTwo { get; } = { new(0, 0), new(2, 0), new(2, 2), new(0, 2) };
 
     [Fact]
     public void ShouldSucceed()
@@ -18,19 +21,41 @@ public class TouchingAMembrane
         //GIVEN
         var gameConfig = new GameConfig("Test", "svend", TwoByTwo);
         var game = new Game(gameConfig);
-        GameService.AddPlayerToGame(game, "steven");
-        game = game with { CurrentPlayerTurn = "steven" };
+        GameHelper.AddPlayerToGame(game, "steven");
+        game = game with
+        {
+            GameState = GameState.Playing,
+            CurrentPlayerTurn = "steven"
+        };
         //WHEN
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));
-        game = GameService.TouchMembraneOnGame(game, "steven", "2");
+        game = GameHelper.TouchMembraneOnGame(game, "steven", "2");
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));
-        game = GameService.TouchMembraneOnGame(game, "svend", "3");
+        game = GameHelper.TouchMembraneOnGame(game, "svend", "3");
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));
-        game = GameService.TouchMembraneOnGame(game, "svend", "8");
+        game = GameHelper.TouchMembraneOnGame(game, "svend", "8");
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));
-        game = GameService.TouchMembraneOnGame(game, "svend", "7");
+        game = GameHelper.TouchMembraneOnGame(game, "svend", "7");
         //THEN
         RenderService.RenderBoardAsPng(game.Board, nameof(ShouldSucceed));
+    }
+
+    [Fact]
+    public void ShouldFailIfIfGameIsNotInPlayingPhase()
+    {
+        const string owner = "svend";
+        const string playerName = "steven";
+        var gameConfig = new GameConfig("Test", owner, TwoByTwo);
+        var game = new Game(gameConfig);
+        game = game with
+        {
+            CurrentPlayerTurn = playerName
+        };
+        var gameStates = Enum.GetValues(typeof(GameState)).Cast<GameState>();
+        foreach (var gameState in gameStates.Where(x => x != GameState.Playing))
+        {
+            Assert.Throws<InvalidGameStateException>(() => GameHelper.TouchMembraneOnGame(game with { GameState = gameState }, playerName, "2"));
+        }
     }
 
     [Fact]
@@ -42,10 +67,11 @@ public class TouchingAMembrane
         var game = new Game(gameConfig);
         game = game with
         {
+            GameState = GameState.Playing,
             Players = game.Players.Add(playerName),
-            CurrentPlayerTurn = owner,
+            CurrentPlayerTurn = owner
         };
-        Assert.Throws<IncorrectPlayerTurnException>(() => GameService.TouchMembraneOnGame(game, playerName, "2"));
+        Assert.Throws<IncorrectPlayerTurnException>(() => GameHelper.TouchMembraneOnGame(game, playerName, "2"));
     }
 
     [Fact]
@@ -57,11 +83,12 @@ public class TouchingAMembrane
         const string membraneId = "test";
         game = game with
         {
+            GameState = GameState.Playing,
             Players = game.Players.Add(playerName),
             CurrentPlayerTurn = playerName
         };
 
-        Assert.Throws<MembraneNotFoundException>(() => GameService.TouchMembraneOnGame(game, playerName, membraneId));
+        Assert.Throws<MembraneNotFoundException>(() => GameHelper.TouchMembraneOnGame(game, playerName, membraneId));
     }
 
     [Fact]
@@ -70,9 +97,10 @@ public class TouchingAMembrane
         const string playerName = "steven";
         var gameConfig = new GameConfig("Test", "svend", TwoByTwo);
         var game = new Game(gameConfig);
-        var modifiedMembrane = game.Board.Membranes.FirstOrDefault();
+        var modifiedMembrane = game.Board.Membranes.First();
         game = game with
         {
+            GameState = GameState.Playing,
             Players = game.Players.Add(playerName),
             CurrentPlayerTurn = playerName,
             Board = game.Board with
@@ -84,7 +112,7 @@ public class TouchingAMembrane
             }
         };
 
-        Assert.Throws<MembraneAlreadyTouchedException>(() => GameService.TouchMembraneOnGame(game, playerName, modifiedMembrane.Id));
+        Assert.Throws<MembraneAlreadyTouchedException>(() => GameHelper.TouchMembraneOnGame(game, playerName, modifiedMembrane.Id));
     }
 
     [Fact]
@@ -96,6 +124,7 @@ public class TouchingAMembrane
         var firstMembrane = game.Board.Membranes.First();
         game = game with
         {
+            GameState = GameState.Playing,
             Players = game.Players.Add(playerName),
             CurrentPlayerTurn = playerName,
             Board = game.Board with
@@ -107,7 +136,7 @@ public class TouchingAMembrane
             }
         };
 
-        game = GameService.TouchMembraneOnGame(game, playerName, firstMembrane.Id);
+        game = GameHelper.TouchMembraneOnGame(game, playerName, firstMembrane.Id);
         firstMembrane = game.Board.Membranes.First();
         Assert.True(firstMembrane.IsTouched);
         Assert.Equal(playerName, firstMembrane.TouchedBy);
@@ -122,6 +151,7 @@ public class TouchingAMembrane
         var firstMembrane = game.Board.Membranes.First();
         game = game with
         {
+            GameState = GameState.Playing,
             Players = game.Players.Add(playerName),
             CurrentPlayerTurn = playerName,
             Board = game.Board with
@@ -132,8 +162,8 @@ public class TouchingAMembrane
                 })
             }
         };
-        game = GameService.TouchMembraneOnGame(game, playerName, firstMembrane.Id);
-        Assert.NotEqual(playerName, game.CurrentPlayerTurn);
+        game = GameHelper.TouchMembraneOnGame(game, playerName, firstMembrane.Id);
+        Assert.NotEqual<PlayerName>(playerName, game.CurrentPlayerTurn);
     }
 
     [Fact]
@@ -146,6 +176,7 @@ public class TouchingAMembrane
         var thirdMembrane = game.Board.Membranes[2];
         game = game with
         {
+            GameState = GameState.Playing,
             Players = game.Players.Add(playerName),
             CurrentPlayerTurn = playerName,
             Board = game.Board with
@@ -158,7 +189,7 @@ public class TouchingAMembrane
             }
         };
 
-        game = GameService.TouchMembraneOnGame(game, playerName, thirdMembrane.Id);
+        game = GameHelper.TouchMembraneOnGame(game, playerName, thirdMembrane.Id);
         var firstCell = game.Board.Cells.First();
 
         Assert.True(firstCell.IsConquered);
@@ -167,5 +198,19 @@ public class TouchingAMembrane
 
 public class ConqueringACell
 {
-    //  ShouldMarkTheGameAsFinishedIfLastCell
+    [Fact]
+    public void ShouldMarkTheGameAsFinishedIfLastCell()
+    {
+        const string playerName = "steven";
+        var gameConfig = new GameConfig("Test", "svend", new PointF[] { new(0, 0), new(2, 0), new(2, 1), new(0, 1) });
+        var game = new Game(gameConfig);
+        game = game with
+        {
+            CurrentPlayerTurn = playerName,
+            GameState = GameState.Playing
+        };
+        var secondMembrane = game.Board.Membranes[1];
+        game = GameHelper.TouchMembraneOnGame(game, playerName, secondMembrane.Id);
+        Assert.Equal(GameState.Finished, game.GameState);
+    }
 }

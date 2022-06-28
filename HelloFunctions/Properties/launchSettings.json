@@ -1,0 +1,11 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "HelloFunctions": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "port": 1337
+      }
+    }
+  }
+}
