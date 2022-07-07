@@ -178,7 +178,7 @@ public static class PolygonHelper
         bool IsSegmentOnSegment(Wall segment1, Wall segment2)
         {
             float GetSlopeOfSegment(Wall segment) =>
-                (segment.Point2.Y - segment.Point1.Y) / (segment.Point2.X - segment.Point1.X);
+                (segment.Second.Y - segment.First.Y) / (segment.Second.X - segment.First.X);
 
             var areSegmentsCollinear = GetSlopeOfSegment(segment1) == GetSlopeOfSegment(segment2);
             if (areSegmentsCollinear == false)
@@ -186,14 +186,14 @@ public static class PolygonHelper
                 return false;
             }
 
-            return segment1.Point1.X <= Math.Max(segment2.Point1.X, segment2.Point2.X) &&
-                   segment1.Point1.X >= Math.Min(segment2.Point1.X, segment2.Point2.X) &&
-                   segment1.Point1.Y <= Math.Max(segment2.Point1.Y, segment2.Point2.Y) &&
-                   segment1.Point1.Y >= Math.Min(segment2.Point1.Y, segment2.Point2.Y) &&
-                   segment1.Point2.X <= Math.Max(segment2.Point1.X, segment2.Point2.X) &&
-                   segment1.Point2.X >= Math.Min(segment2.Point1.X, segment2.Point2.X) &&
-                   segment1.Point2.Y <= Math.Max(segment2.Point1.Y, segment2.Point2.Y) &&
-                   segment1.Point2.Y >= Math.Min(segment2.Point1.Y, segment2.Point2.Y);
+            return segment1.First.X <= Math.Max(segment2.First.X, segment2.Second.X) &&
+                   segment1.First.X >= Math.Min(segment2.First.X, segment2.Second.X) &&
+                   segment1.First.Y <= Math.Max(segment2.First.Y, segment2.Second.Y) &&
+                   segment1.First.Y >= Math.Min(segment2.First.Y, segment2.Second.Y) &&
+                   segment1.Second.X <= Math.Max(segment2.First.X, segment2.Second.X) &&
+                   segment1.Second.X >= Math.Min(segment2.First.X, segment2.Second.X) &&
+                   segment1.Second.Y <= Math.Max(segment2.First.Y, segment2.Second.Y) &&
+                   segment1.Second.Y >= Math.Min(segment2.First.Y, segment2.Second.Y);
         }
 
         var isSegmentOnPolygon = false;

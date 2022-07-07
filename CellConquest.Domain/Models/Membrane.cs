@@ -1,24 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using CellConquest.Domain.ValueObjects;
 
 namespace CellConquest.Domain.Models;
 
 public record Membrane
 {
-    public Wall Wall { get; init; }
-    public string Id { get; init; }
+    public Wall Wall { get; }
+    public List<PointF> Coordinates { get; }
     public string TouchedBy { get; init; }
     public bool IsTouched => TouchedBy != StaticGameValues.NoOne;
 
-
-    public List<Cell> Cells { get; init; }
-
-
-    public Membrane(string id, Wall wall, bool shouldBeMarkedAsOutline)
+    public Membrane(Wall wall, List<PointF> coordinates, bool shouldBeMarkedAsOutline)
     {
-        Id = id;
         Wall = wall;
+        Coordinates = coordinates;
         TouchedBy = StaticGameValues.NoOne;
         if (shouldBeMarkedAsOutline)
         {

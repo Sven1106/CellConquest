@@ -83,7 +83,7 @@ public static class GameHelper
 
     #region Game Phase
 
-    public static Game TouchMembraneOnGame(Game game, PlayerName playerName, string membraneId)
+    public static Game TouchMembraneOnGame(Game game, PlayerName playerName, Wall selectedWall)
     {
         if (game.GameState != GameState.Playing)
         {
@@ -95,30 +95,35 @@ public static class GameHelper
             throw new IncorrectPlayerTurnException($"It's not {playerName}'s turn");
         }
 
-        var membrane = game.Board.Membranes.FirstOrDefault(x => x.Id == membraneId);
-        if (membrane is null)
+        var membraneFound = game.Board.Membranes.FirstOrDefault(m => m.Wall == selectedWall);
+        if (membraneFound is null)
         {
-            throw new MembraneNotFoundException($"Membrane with id: {membraneId} doesn't exist");
+            throw new MembraneNotFoundException($"Membrane with id: {selectedWall} doesn't exist");
         }
 
-        if (membrane.IsTouched)
+        if (membraneFound.IsTouched)
         {
-            throw new MembraneAlreadyTouchedException($"Membrane with id: {membrane.Id} is already touched");
+            throw new MembraneAlreadyTouchedException($"Membrane with id: {membraneFound.Wall} is already touched");
         }
 
         game = game with
         {
             Board = game.Board with
             {
-                Membranes = game.Board.Membranes.Replace(membrane, membrane with
+                Membranes = game.Board.Membranes.Replace(membraneFound, membraneFound with
                 {
                     TouchedBy = playerName
                 })
             }
         };
 
-        var conquerableCellsConnectedToMembraneId = GetConquerableCellsConnectedToMembraneId(game.Board.Cells, game.Board.Membranes, game.Board.CellMembranes, membraneId);
-        if (conquerableCellsConnectedToMembraneId.IsEmpty)
+        var conquerableCellsConnectedToMembraneWall = game.Board.Cells
+            .Where(cell => cell.Walls.Contains(selectedWall)
+                           && cell.IsConquered == false
+                           && cell.Walls.All(wall =>
+                               game.Board.Membranes.FirstOrDefault(membrane => membrane.Wall == wall).IsTouched)) // TODO Figure out why game is 'Captured variable is modified in the outer scope'
+            .ToImmutableList();
+        if (conquerableCellsConnectedToMembraneWall.IsEmpty)
         {
             var nextPlayerTurn = game.Players[(game.Players.IndexOf(playerName) + 1) % game.Players.Count];
             return game with
@@ -133,8 +138,8 @@ public static class GameHelper
             {
                 Cells = game.Board.Cells
                     .Select(cell =>
-                        conquerableCellsConnectedToMembraneId
-                            .Any(conquerableCell => conquerableCell.Id == cell.Id)
+                        conquerableCellsConnectedToMembraneWall
+                            .Any(conquerableCell => conquerableCell.Walls == cell.Walls)
                             ? cell with
                             {
                                 ConqueredBy = playerName
@@ -163,22 +168,4 @@ public static class GameHelper
     }
 
     #endregion
-
-    private static ImmutableList<Cell> GetConquerableCellsConnectedToMembraneId(
-        ImmutableList<Cell> cells,
-        ImmutableList<Membrane> membranes,
-        ImmutableList<CellMembrane> cellMembranes,
-        string membraneId)
-    {
-        var conquerableCells =
-            from cellMembrane
-                in cellMembranes.Where(x => x.MembraneId == membraneId)
-            let cell = cells.FirstOrDefault(x => x.Id == cellMembrane.CellId)
-            where
-                cell.IsConquered == false &&
-                cellMembranes.Where(i => i.CellId == cellMembrane.CellId)
-                    .All(x => membranes.FirstOrDefault(y => y.Id == x.MembraneId).IsTouched)
-            select cell;
-        return conquerableCells.ToImmutableList();
-    }
 }

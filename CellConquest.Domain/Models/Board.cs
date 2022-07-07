@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using CellConquest.Domain.Helpers;
@@ -13,15 +14,13 @@ public record Board
     public PointF[] Outline { get; }
     public ImmutableList<Cell> Cells { get; init; }
     public ImmutableList<Membrane> Membranes { get; init; }
-    public ImmutableList<CellMembrane> CellMembranes { get; init; }
 
     public Board(PointF[] outline)
     {
         Outline = outline;
-        var (cells, membranes, cellMembranes) = CreateCellsFromPolygon(Outline);
+        var (cells, membranes) = CreateCellsAndMembranesFromPolygon(Outline);
         Cells = ImmutableList<Cell>.Empty.AddRange(cells);
         Membranes = ImmutableList<Membrane>.Empty.AddRange(membranes);
-        CellMembranes = ImmutableList<CellMembrane>.Empty.AddRange(cellMembranes);
     }
 
     private static IEnumerable<Wall> GetWallsOfParallelCell(int wallIndex, Wall wall)
@@ -34,77 +33,77 @@ public record Board
             0 => new Wall[] // cell walls above
             {
                 new(
-                    new PointF(wall.Point1.X, wall.Point1.Y - 1),
-                    new PointF(wall.Point2.X, wall.Point2.Y - 1)
+                    new PointF(wall.First.X, wall.First.Y - 1),
+                    new PointF(wall.Second.X, wall.Second.Y - 1)
                 ),
                 new(
-                    new PointF(wall.Point1.X + 1, wall.Point2.Y - 1),
-                    new PointF(wall.Point2.X, wall.Point2.Y)
+                    new PointF(wall.First.X + 1, wall.Second.Y - 1),
+                    new PointF(wall.Second.X, wall.Second.Y)
                 ),
                 new(
-                    new PointF(wall.Point2.X, wall.Point2.Y),
-                    new PointF(wall.Point1.X, wall.Point1.Y)
+                    new PointF(wall.Second.X, wall.Second.Y),
+                    new PointF(wall.First.X, wall.First.Y)
                 ),
                 new(
-                    new PointF(wall.Point1.X, wall.Point1.Y),
-                    new PointF(wall.Point2.X - 1, wall.Point2.Y - 1)
+                    new PointF(wall.First.X, wall.First.Y),
+                    new PointF(wall.Second.X - 1, wall.Second.Y - 1)
                 )
             },
             1 => new Wall[] // cell walls to the right
             {
                 new(
-                    new PointF(wall.Point1.X, wall.Point1.Y),
-                    new PointF(wall.Point2.X + 1, wall.Point2.Y - 1)
+                    new PointF(wall.First.X, wall.First.Y),
+                    new PointF(wall.Second.X + 1, wall.Second.Y - 1)
                 ),
                 new(
-                    new PointF(wall.Point1.X + 1, wall.Point1.Y),
-                    new PointF(wall.Point2.X + 1, wall.Point2.Y)
+                    new PointF(wall.First.X + 1, wall.First.Y),
+                    new PointF(wall.Second.X + 1, wall.Second.Y)
                 ),
                 new(
-                    new PointF(wall.Point1.X + 1, wall.Point1.Y + 1),
-                    new PointF(wall.Point2.X, wall.Point2.Y)
+                    new PointF(wall.First.X + 1, wall.First.Y + 1),
+                    new PointF(wall.Second.X, wall.Second.Y)
                 ),
                 new(
-                    new PointF(wall.Point2.X, wall.Point2.Y),
-                    new PointF(wall.Point1.X, wall.Point1.Y)
+                    new PointF(wall.Second.X, wall.Second.Y),
+                    new PointF(wall.First.X, wall.First.Y)
                 )
             },
             2 => new Wall[] // cell walls below
             {
                 new( // above
-                    new PointF(wall.Point2.X, wall.Point2.Y),
-                    new PointF(wall.Point1.X, wall.Point1.Y)
+                    new PointF(wall.Second.X, wall.Second.Y),
+                    new PointF(wall.First.X, wall.First.Y)
                 ),
                 new( // right
-                    new PointF(wall.Point1.X, wall.Point1.Y),
-                    new PointF(wall.Point2.X + 1, wall.Point2.Y + 1)
+                    new PointF(wall.First.X, wall.First.Y),
+                    new PointF(wall.Second.X + 1, wall.Second.Y + 1)
                 ),
                 new( // bottom
-                    new PointF(wall.Point1.X, wall.Point1.Y + 1),
-                    new PointF(wall.Point2.X, wall.Point2.Y + 1)
+                    new PointF(wall.First.X, wall.First.Y + 1),
+                    new PointF(wall.Second.X, wall.Second.Y + 1)
                 ),
                 new( // left
-                    new PointF(wall.Point1.X - 1, wall.Point1.Y + 1),
-                    new PointF(wall.Point2.X, wall.Point2.Y)
+                    new PointF(wall.First.X - 1, wall.First.Y + 1),
+                    new PointF(wall.Second.X, wall.Second.Y)
                 )
             },
             3 => new Wall[] // cell walls to the left
             {
                 new( // above
-                    new PointF(wall.Point1.X - 1, wall.Point1.Y - 1),
-                    new PointF(wall.Point2.X, wall.Point2.Y)
+                    new PointF(wall.First.X - 1, wall.First.Y - 1),
+                    new PointF(wall.Second.X, wall.Second.Y)
                 ),
                 new( // right
-                    new PointF(wall.Point2.X, wall.Point2.Y),
-                    new PointF(wall.Point1.X, wall.Point1.Y)
+                    new PointF(wall.Second.X, wall.Second.Y),
+                    new PointF(wall.First.X, wall.First.Y)
                 ),
                 new( // bottom
-                    new PointF(wall.Point1.X, wall.Point1.Y),
-                    new PointF(wall.Point2.X - 1, wall.Point2.Y + 1)
+                    new PointF(wall.First.X, wall.First.Y),
+                    new PointF(wall.Second.X - 1, wall.Second.Y + 1)
                 ),
                 new( // left
-                    new PointF(wall.Point1.X - 1, wall.Point1.Y),
-                    new PointF(wall.Point2.X - 1, wall.Point2.Y)
+                    new PointF(wall.First.X - 1, wall.First.Y),
+                    new PointF(wall.Second.X - 1, wall.Second.Y)
                 )
             },
             _ => throw new Exception("There should only be 4 walls: 0, 1, 2 ,3")
@@ -119,8 +118,8 @@ public record Board
         var hasAnyInvalidWall = false;
         foreach (var wall in walls)
         {
-            var isPoint1InPolygon = PolygonHelper.IsPointInPolygon(wall.Point1, enlargedPolygon);
-            var isPoint2InPolygon = PolygonHelper.IsPointInPolygon(wall.Point2, enlargedPolygon);
+            var isPoint1InPolygon = PolygonHelper.IsPointInPolygon(wall.First, enlargedPolygon);
+            var isPoint2InPolygon = PolygonHelper.IsPointInPolygon(wall.Second, enlargedPolygon);
             if (isPoint1InPolygon == false || isPoint2InPolygon == false)
             {
                 hasAnyInvalidWall = true;
@@ -132,7 +131,7 @@ public record Board
                 var nextIndex = (polygonIndex + 1) % enlargedPolygon.Length;
                 var currentPolygonPoint = enlargedPolygon[polygonIndex];
                 var nextPolygonPoint = enlargedPolygon[nextIndex];
-                PolygonHelper.FindIntersection(wall.Point1, wall.Point2, currentPolygonPoint,
+                PolygonHelper.FindIntersection(wall.First, wall.Second, currentPolygonPoint,
                     nextPolygonPoint, out var doesLinesIntersect, out var doesSegmentsIntersect,
                     out _);
                 if (doesSegmentsIntersect == false || doesLinesIntersect == false)
@@ -168,29 +167,43 @@ public record Board
         return walls;
     }
 
-    private static (List<Cell>, List<Membrane>, List<CellMembrane>) CreateCellsFromPolygon(PointF[] polygon)
+    private static List<PointF> GetPredictedCoordinates(RectangleF boundingBox, int column, int row)
+    {
+        var topLeft = new PointF(boundingBox.X + column, boundingBox.Y + row);
+        var topRight = new PointF(boundingBox.X + column + 1, boundingBox.Y + row);
+        var bottomRight = new PointF(boundingBox.X + column + 1, boundingBox.Y + row + 1);
+        var bottomLeft = new PointF(boundingBox.X + column, boundingBox.Y + row + 1);
+        var coordinates = new List<PointF>
+        {
+            topLeft,
+            topRight,
+            bottomRight,
+            bottomLeft
+        };
+        return coordinates;
+    }
+
+    private static (List<Cell>, List<Membrane>) CreateCellsAndMembranesFromPolygon(PointF[] polygon)
     {
         var cells = new List<Cell>();
         var membranes = new List<Membrane>();
-        var cellMembranes = new List<CellMembrane>();
         var boundingBox = PolygonHelper.GetBounds(polygon.ToList());
         for (var row = 0; row < boundingBox.Height; row++) // For creating cells that fits in a square grid
         {
             for (var column = 0; column < boundingBox.Width; column++)
             {
-                var predictedWalls = GetPredictedWalls(boundingBox, column, row);
-                var isPredictedWallsInvalid = IsAnyWallInvalid(predictedWalls, polygon);
+                var walls = GetPredictedWalls(boundingBox, column, row);
+                var isPredictedWallsInvalid = IsAnyWallInvalid(walls, polygon);
                 if (isPredictedWallsInvalid) // CONDITION
                 {
                     continue;
                 }
 
-                Cell newCell = new(Convert.ToString(cells.Count + 1));
+                var membranesWithSameWallsAsCell = new List<Membrane>();
                 var newMembranes = new List<Membrane>();
-                var newCellMembranes = new List<CellMembrane>();
-                for (var wallIndex = 0; wallIndex < predictedWalls.Length; wallIndex++)
+                for (var wallIndex = 0; wallIndex < walls.Length; wallIndex++)
                 {
-                    var wall = predictedWalls[wallIndex];
+                    var wall = walls[wallIndex];
                     var membrane = membranes.FirstOrDefault(x => x.Wall.Equals(wall));
                     if (membrane is null)
                     {
@@ -205,30 +218,27 @@ public record Board
                             markMembraneAsOutline = isAnyWallOfParallelCellInvalid;
                         }
 
-
-                        membrane = new Membrane(Convert.ToString(membranes.Count + newMembranes.Count + 1), wall,
-                            markMembraneAsOutline);
+                        membrane = new Membrane(wall, new List<PointF> { wall.First, wall.Second }, markMembraneAsOutline);
                         newMembranes.Add(membrane);
                     }
 
-                    newCellMembranes.Add(new CellMembrane(newCell.Id, membrane.Id));
+                    membranesWithSameWallsAsCell.Add(membrane);
                 }
 
-                if (newCellMembranes.All(cellMembrane =>
-                        membranes.Concat(newMembranes).FirstOrDefault(x => x.Id == cellMembrane.MembraneId)
-                            .TouchedBy ==
-                        StaticGameValues.Board)
-                   )
+
+                if (membranesWithSameWallsAsCell.All(cellMembrane => cellMembrane.TouchedBy == StaticGameValues.Board))
                     // Skips a cell if it is a 1by1
                 {
                     continue;
                 }
 
+
+                Cell newCell = new(walls, GetPredictedCoordinates(boundingBox, column, row));
                 cells.Add(newCell);
                 membranes.AddRange(newMembranes);
-                cellMembranes.AddRange(newCellMembranes);
             }
         }
-        return (cells, membranes, cellMembranes);
+
+        return (cells, membranes);
     }
 }

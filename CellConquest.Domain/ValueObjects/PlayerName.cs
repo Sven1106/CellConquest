@@ -6,9 +6,9 @@ namespace CellConquest.Domain.ValueObjects;
 
 public record PlayerName
 {
-    private string Value { get; }
+    private readonly string _value;
 
-    private PlayerName(string value)
+    public PlayerName(string value)
     {
         var trimmedValue = value.Trim();
         if (string.IsNullOrWhiteSpace(trimmedValue))
@@ -21,9 +21,9 @@ public record PlayerName
             throw new InvalidPlayerNameException();
         }
 
-        Value = trimmedValue;
+        _value = trimmedValue;
     }
 
-    public static implicit operator string(PlayerName playerName) => playerName.Value;
+    public static implicit operator string(PlayerName playerName) => playerName._value;
     public static implicit operator PlayerName(string playerName) => new(playerName);
 }

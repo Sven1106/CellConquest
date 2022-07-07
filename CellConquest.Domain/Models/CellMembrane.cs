@@ -1,3 +1,5 @@
-﻿namespace CellConquest.Domain.Models;
+﻿using CellConquest.Domain.ValueObjects;
 
-public record CellMembrane(string CellId, string MembraneId);
+namespace CellConquest.Domain.Models;
+
+public record CellMembrane(string CellId, Wall MembraneWall);

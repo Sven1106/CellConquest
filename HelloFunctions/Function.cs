@@ -1,4 +1,3 @@
-
 using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
@@ -19,7 +18,7 @@ namespace HelloFunctions
             var db = await FirestoreDb.CreateAsync(project);
             var docRef = db.Collection("users")
                 .Document("123asd");
-            var bla = new User { First = "Ada1", Last = "Lovelace", Born = 1815, Address = new Address { Street = "HereStreet" } };
+            var bla = new User(first: "Ada1", last: "Lovelace", born: 1815, address: new Address(street: "HereStreet"));
             await docRef.SetAsync(bla);
             await context.Response.WriteAsync($"Created Cloud Firestore client with project ID: {project}");
         }
@@ -29,16 +28,28 @@ namespace HelloFunctions
     public class User
     {
         [FirestoreProperty]
-        public string First { get; set; }
+        public string First { get; }
 
         [FirestoreProperty]
-        public string Last { get; set; }
+        public string Last { get; }
 
         [FirestoreProperty]
-        public int Born { get; set; }
+        public int Born { get; }
 
         [FirestoreProperty]
-        public Address Address { get; set; }
+        public Address Address { get; }
+
+        public User() // For serialization
+        {
+        }
+
+        public User(string first, string last, int born, Address address)
+        {
+            First = first;
+            Last = last;
+            Born = born;
+            Address = address;
+        }
     }
 
     [FirestoreData]
@@ -46,5 +57,14 @@ namespace HelloFunctions
     {
         [FirestoreProperty]
         public string Street { get; set; }
+
+        public Address() // For serialization
+        {
+        }
+
+        public Address(string street)
+        {
+            Street = street;
+        }
     }
 }

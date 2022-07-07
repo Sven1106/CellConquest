@@ -3,4 +3,4 @@ using CellConquest.Shared.Abstractions.Domain;
 
 namespace CellConquest.Domain.Events;
 
-public record PlayerAddedToGame(PlayerName PlayerName) : IDomainEvent;
+public record PlayerRemoved(string PlayerName) : IDomainEvent;

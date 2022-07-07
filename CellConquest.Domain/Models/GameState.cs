@@ -1,7 +1,4 @@
-﻿using CellConquest.Domain.Entities;
-using CellConquest.Domain.ValueObjects;
-
-namespace CellConquest.Domain.Models;
+﻿namespace CellConquest.Domain.Models;
 
 public enum GameState
 {

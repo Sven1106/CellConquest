@@ -1,36 +1,42 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using CellConquest.Domain.Exceptions;
 
 namespace CellConquest.Domain.ValueObjects;
 
-public sealed record Wall
+public sealed record Wall // Convert to contain Coordinates.
 {
-    public PointF Point1 { get; }
-    public PointF Point2 { get; }
+    public PointF First { get; }
+    public PointF Second { get; }
 
-    public Wall(PointF point1, PointF point2)
+    public Wall(PointF first, PointF second)
     {
-        if (point1.Equals(point2))
+        if (first.Equals(second))
         {
-            throw new PointsHaveTheSameCoordinatesException($"{nameof(point1)} and {nameof(point2)} cant have the same coordinates");
+            throw new PointsHaveTheSameCoordinatesException($"{nameof(first)} and {nameof(second)} cant have the same coordinates");
         }
 
-        Point1 = point1;
-        Point2 = point2;
+        First = first;
+        Second = second;
     }
 
     public bool Equals(Wall? other)
     {
         return other != null && (
-            Point1 == other.Point1 && Point2 == other.Point2 ||
-            Point1 == other.Point2 && Point2 == other.Point1
+            First == other.First && Second == other.Second ||
+            First == other.Second && Second == other.First
         );
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Point1, Point2);
+        return HashCode.Combine(First, Second);
     }
+
+    public override string ToString()
+    {
+        return $"({First.X},{First.Y})({Second.X},{Second.Y})";
+    }
+    //
+    // public static implicit operator string(Wall wall) => wall.ToString();
 }
