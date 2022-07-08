@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Linq;
 using CellConquest.Domain.Entities;
 using CellConquest.Domain.Exceptions;
 using CellConquest.Domain.Models;
 using CellConquest.Domain.ValueObjects;
+using System.Drawing;
 
 namespace CellConquest.Domain.Helpers;
 
@@ -118,10 +120,10 @@ public static class GameHelper
         };
 
         var conquerableCellsConnectedToMembraneWall = game.Board.Cells
-            .Where(cell => cell.Walls.Contains(selectedWall)
+            .Where(cell => cell.Coordinates.Any(x => new List<PointF> { selectedWall.First, selectedWall.Second }.Contains(x))
                            && cell.IsConquered == false
-                           && cell.Walls.All(wall =>
-                               game.Board.Membranes.FirstOrDefault(membrane => membrane.Wall == wall).IsTouched)) // TODO Figure out why game is 'Captured variable is modified in the outer scope'
+                           && cell.Coordinates.All(wall =>
+                               game.Board.Membranes.FirstOrDefault(membrane => membrane.Coordinates.Contains(wall)).IsTouched)) // TODO Figure out why game is 'Captured variable is modified in the outer scope'
             .ToImmutableList();
         if (conquerableCellsConnectedToMembraneWall.IsEmpty)
         {
@@ -139,7 +141,7 @@ public static class GameHelper
                 Cells = game.Board.Cells
                     .Select(cell =>
                         conquerableCellsConnectedToMembraneWall
-                            .Any(conquerableCell => conquerableCell.Walls == cell.Walls)
+                            .Any(conquerableCell => conquerableCell.Coordinates == cell.Coordinates)
                             ? cell with
                             {
                                 ConqueredBy = playerName

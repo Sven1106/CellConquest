@@ -233,7 +233,7 @@ public record Board
                 }
 
 
-                Cell newCell = new(walls, GetPredictedCoordinates(boundingBox, column, row));
+                Cell newCell = new(GetPredictedCoordinates(boundingBox, column, row));
                 cells.Add(newCell);
                 membranes.AddRange(newMembranes);
             }
