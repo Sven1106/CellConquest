@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using CellConquest.Domain.Helpers;
-using CellConquest.Domain.ValueObjects;
 
 namespace CellConquest.Domain.Models;
 
@@ -23,103 +21,57 @@ public record Board
         Membranes = ImmutableList<Membrane>.Empty.AddRange(membranes);
     }
 
-    private static IEnumerable<Wall> GetWallsOfParallelCell(int wallIndex, Wall wall)
+    private static PointF[] GetCoordinatesOfParallelCell(int wallIndex, IReadOnlyList<PointF> coordinates)
     {
         // This is tightly coupled to 4 wall.
         // Since we know walls are iterated from top > right > bottom > left,
         // we can use the index to map to the corresponding parallel cell walls.
-        var parallelCellWalls = wallIndex switch
+        var parallelCellCoordinates = wallIndex switch
         {
-            0 => new Wall[] // cell walls above
+            0 => new PointF[] // cell walls above
             {
-                new(
-                    new PointF(wall.First.X, wall.First.Y - 1),
-                    new PointF(wall.Second.X, wall.Second.Y - 1)
-                ),
-                new(
-                    new PointF(wall.First.X + 1, wall.Second.Y - 1),
-                    new PointF(wall.Second.X, wall.Second.Y)
-                ),
-                new(
-                    new PointF(wall.Second.X, wall.Second.Y),
-                    new PointF(wall.First.X, wall.First.Y)
-                ),
-                new(
-                    new PointF(wall.First.X, wall.First.Y),
-                    new PointF(wall.Second.X - 1, wall.Second.Y - 1)
-                )
+                new(coordinates[0].X, coordinates[0].Y - 1),
+                new(coordinates[1].X, coordinates[1].Y - 1),
+                new(coordinates[1].X, coordinates[1].Y),
+                new(coordinates[0].X, coordinates[0].Y),
             },
-            1 => new Wall[] // cell walls to the right
+            1 => new PointF[] // cell walls to the right
             {
-                new(
-                    new PointF(wall.First.X, wall.First.Y),
-                    new PointF(wall.Second.X + 1, wall.Second.Y - 1)
-                ),
-                new(
-                    new PointF(wall.First.X + 1, wall.First.Y),
-                    new PointF(wall.Second.X + 1, wall.Second.Y)
-                ),
-                new(
-                    new PointF(wall.First.X + 1, wall.First.Y + 1),
-                    new PointF(wall.Second.X, wall.Second.Y)
-                ),
-                new(
-                    new PointF(wall.Second.X, wall.Second.Y),
-                    new PointF(wall.First.X, wall.First.Y)
-                )
+                new(coordinates[0].X, coordinates[0].Y),
+                new(coordinates[0].X + 1, coordinates[0].Y),
+                new(coordinates[1].X + 1, coordinates[1].Y),
+                new(coordinates[1].X, coordinates[1].Y),
             },
-            2 => new Wall[] // cell walls below
+            2 => new PointF[] // cell walls below
             {
-                new( // above
-                    new PointF(wall.Second.X, wall.Second.Y),
-                    new PointF(wall.First.X, wall.First.Y)
-                ),
-                new( // right
-                    new PointF(wall.First.X, wall.First.Y),
-                    new PointF(wall.Second.X + 1, wall.Second.Y + 1)
-                ),
-                new( // bottom
-                    new PointF(wall.First.X, wall.First.Y + 1),
-                    new PointF(wall.Second.X, wall.Second.Y + 1)
-                ),
-                new( // left
-                    new PointF(wall.First.X - 1, wall.First.Y + 1),
-                    new PointF(wall.Second.X, wall.Second.Y)
-                )
+                new(coordinates[1].X, coordinates[1].Y),
+                new(coordinates[0].X, coordinates[0].Y),
+                new(coordinates[0].X, coordinates[0].Y + 1),
+                new(coordinates[1].X, coordinates[1].Y + 1)
             },
-            3 => new Wall[] // cell walls to the left
+            3 => new PointF[] // cell walls to the left
             {
-                new( // above
-                    new PointF(wall.First.X - 1, wall.First.Y - 1),
-                    new PointF(wall.Second.X, wall.Second.Y)
-                ),
-                new( // right
-                    new PointF(wall.Second.X, wall.Second.Y),
-                    new PointF(wall.First.X, wall.First.Y)
-                ),
-                new( // bottom
-                    new PointF(wall.First.X, wall.First.Y),
-                    new PointF(wall.Second.X - 1, wall.Second.Y + 1)
-                ),
-                new( // left
-                    new PointF(wall.First.X - 1, wall.First.Y),
-                    new PointF(wall.Second.X - 1, wall.Second.Y)
-                )
+                new(coordinates[1].X - 1, coordinates[1].Y),
+                new(coordinates[1].X, coordinates[1].Y),
+                new(coordinates[0].X, coordinates[0].Y),
+                new(coordinates[0].X - 1, coordinates[0].Y),
             },
             _ => throw new Exception("There should only be 4 walls: 0, 1, 2 ,3")
         };
-        return parallelCellWalls;
+        return parallelCellCoordinates;
     }
 
-    private static bool IsAnyWallInvalid(IEnumerable<Wall> walls, PointF[] polygon)
+    private static bool IsAnyCoordinateInvalid(IReadOnlyList<PointF> coordinates, PointF[] polygon)
     {
         var enlargedPolygon = PolygonHelper.GetEnlargedPolygon(polygon, -0.001f);
 
         var hasAnyInvalidWall = false;
-        foreach (var wall in walls)
+        for (var i = 0; i < coordinates.Count; i++)
         {
-            var isPoint1InPolygon = PolygonHelper.IsPointInPolygon(wall.First, enlargedPolygon);
-            var isPoint2InPolygon = PolygonHelper.IsPointInPolygon(wall.Second, enlargedPolygon);
+            var currentCoordinate = coordinates[i];
+            var nextCoordinate = coordinates[(i + 1) % coordinates.Count];
+            var isPoint1InPolygon = PolygonHelper.IsPointInPolygon(currentCoordinate, enlargedPolygon);
+            var isPoint2InPolygon = PolygonHelper.IsPointInPolygon(nextCoordinate, enlargedPolygon);
             if (isPoint1InPolygon == false || isPoint2InPolygon == false)
             {
                 hasAnyInvalidWall = true;
@@ -131,7 +83,7 @@ public record Board
                 var nextIndex = (polygonIndex + 1) % enlargedPolygon.Length;
                 var currentPolygonPoint = enlargedPolygon[polygonIndex];
                 var nextPolygonPoint = enlargedPolygon[nextIndex];
-                PolygonHelper.FindIntersection(wall.First, wall.Second, currentPolygonPoint,
+                PolygonHelper.FindIntersection(currentCoordinate, nextCoordinate, currentPolygonPoint,
                     nextPolygonPoint, out var doesLinesIntersect, out var doesSegmentsIntersect,
                     out _);
                 if (doesSegmentsIntersect == false || doesLinesIntersect == false)
@@ -147,33 +99,13 @@ public record Board
         return hasAnyInvalidWall;
     }
 
-    private static Wall[] GetPredictedWalls(RectangleF boundingBox, int column, int row)
+    private static PointF[] GetPredictedCellCoordinates(RectangleF boundingBox, int column, int row)
     {
         var topLeft = new PointF(boundingBox.X + column, boundingBox.Y + row);
         var topRight = new PointF(boundingBox.X + column + 1, boundingBox.Y + row);
         var bottomRight = new PointF(boundingBox.X + column + 1, boundingBox.Y + row + 1);
         var bottomLeft = new PointF(boundingBox.X + column, boundingBox.Y + row + 1);
-        var topWall = new Wall(topLeft, topRight);
-        var rightWall = new Wall(topRight, bottomRight);
-        var bottomWall = new Wall(bottomRight, bottomLeft);
-        var leftWall = new Wall(bottomLeft, topLeft);
-        var walls = new[]
-        {
-            topWall,
-            rightWall,
-            bottomWall,
-            leftWall
-        };
-        return walls;
-    }
-
-    private static List<PointF> GetPredictedCoordinates(RectangleF boundingBox, int column, int row)
-    {
-        var topLeft = new PointF(boundingBox.X + column, boundingBox.Y + row);
-        var topRight = new PointF(boundingBox.X + column + 1, boundingBox.Y + row);
-        var bottomRight = new PointF(boundingBox.X + column + 1, boundingBox.Y + row + 1);
-        var bottomLeft = new PointF(boundingBox.X + column, boundingBox.Y + row + 1);
-        var coordinates = new List<PointF>
+        var coordinates = new[]
         {
             topLeft,
             topRight,
@@ -187,54 +119,52 @@ public record Board
     {
         var cells = new List<Cell>();
         var membranes = new List<Membrane>();
-        var boundingBox = PolygonHelper.GetBounds(polygon.ToList());
+        var boundingBox = PolygonHelper.GetBounds(polygon);
         for (var row = 0; row < boundingBox.Height; row++) // For creating cells that fits in a square grid
         {
             for (var column = 0; column < boundingBox.Width; column++)
             {
-                var walls = GetPredictedWalls(boundingBox, column, row);
-                var isPredictedWallsInvalid = IsAnyWallInvalid(walls, polygon);
-                if (isPredictedWallsInvalid) // CONDITION
+                var predictedCoordinatesForCell = GetPredictedCellCoordinates(boundingBox, column, row);
+                if (IsAnyCoordinateInvalid(predictedCoordinatesForCell, polygon)) // CONDITION
                 {
                     continue;
                 }
 
-                var membranesWithSameWallsAsCell = new List<Membrane>();
+                var membranesWithSameCoordinatesAsCell = new List<Membrane>();
                 var newMembranes = new List<Membrane>();
-                for (var wallIndex = 0; wallIndex < walls.Length; wallIndex++)
+                for (var index = 0; index < predictedCoordinatesForCell.Length; index++)
                 {
-                    var wall = walls[wallIndex];
-                    var membrane = membranes.FirstOrDefault(x => x.Wall.Equals(wall));
+                    var edge = new[] { predictedCoordinatesForCell[index], predictedCoordinatesForCell[(index + 1) % predictedCoordinatesForCell.Length] };
+                    var membrane = membranes.FirstOrDefault(x => x.Coordinates.All(edge.Contains));
                     if (membrane is null)
                     {
-                        var isWallAnOutline = PolygonHelper.IsSegmentOnPolygon(wall, polygon);
-                        var markMembraneAsOutline = isWallAnOutline;
+                        var isEdgeAnOutline = PolygonHelper.IsEdgeOnPolygon(edge, polygon);
+                        var markMembraneAsOutline = isEdgeAnOutline;
                         if (markMembraneAsOutline == false)
                         {
-                            var wallsOfParallelCell = GetWallsOfParallelCell(wallIndex, wall);
+                            var coordinatesOfParallelCell = GetCoordinatesOfParallelCell(index, edge);
                             // checks if parallel neighbour cell walls are out of polygon.
-                            var isAnyWallOfParallelCellInvalid =
-                                IsAnyWallInvalid(wallsOfParallelCell, polygon); // TODO This could be optimized.
-                            markMembraneAsOutline = isAnyWallOfParallelCellInvalid;
+                            var isAnyCoordinateOfParallelCellInvalid =
+                                IsAnyCoordinateInvalid(coordinatesOfParallelCell, polygon); // TODO This could be optimized.
+                            markMembraneAsOutline = isAnyCoordinateOfParallelCellInvalid;
                         }
 
-                        membrane = new Membrane(wall, new List<PointF> { wall.First, wall.Second }, markMembraneAsOutline);
+                        membrane = new Membrane(edge, markMembraneAsOutline);
                         newMembranes.Add(membrane);
                     }
 
-                    membranesWithSameWallsAsCell.Add(membrane);
+                    membranesWithSameCoordinatesAsCell.Add(membrane);
                 }
 
 
-                if (membranesWithSameWallsAsCell.All(cellMembrane => cellMembrane.TouchedBy == StaticGameValues.Board))
-                    // Skips a cell if it is a 1by1
+                if (membranesWithSameCoordinatesAsCell.All(cellMembrane => cellMembrane.TouchedBy == StaticGameValues.Board))
+                    // Skips a cell if it is already captured
                 {
                     continue;
                 }
 
 
-                Cell newCell = new(GetPredictedCoordinates(boundingBox, column, row));
-                cells.Add(newCell);
+                cells.Add(new Cell(predictedCoordinatesForCell));
                 membranes.AddRange(newMembranes);
             }
         }

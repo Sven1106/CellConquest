@@ -2,7 +2,6 @@ using System;
 using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Linq;
-using CellConquest.Domain.Entities;
 using CellConquest.Domain.Exceptions;
 using CellConquest.Domain.Models;
 using CellConquest.Domain.ValueObjects;
@@ -85,8 +84,13 @@ public static class GameHelper
 
     #region Game Phase
 
-    public static Game TouchMembraneOnGame(Game game, PlayerName playerName, Wall selectedWall)
+    public static Game TouchMembraneOnGame(Game game, PlayerName playerName, PointF[] selectedWall)
     {
+        if (game is null)
+        {
+            throw new NullReferenceException();
+        }
+
         if (game.GameState != GameState.Playing)
         {
             throw new InvalidGameStateException("Player can only touch a membrane in Playing state");
@@ -97,7 +101,7 @@ public static class GameHelper
             throw new IncorrectPlayerTurnException($"It's not {playerName}'s turn");
         }
 
-        var membraneFound = game.Board.Membranes.FirstOrDefault(m => m.Wall == selectedWall);
+        var membraneFound = game.Board.Membranes.FirstOrDefault(m => selectedWall.Equals(m.Coordinates));
         if (membraneFound is null)
         {
             throw new MembraneNotFoundException($"Membrane with id: {selectedWall} doesn't exist");
@@ -105,7 +109,7 @@ public static class GameHelper
 
         if (membraneFound.IsTouched)
         {
-            throw new MembraneAlreadyTouchedException($"Membrane with id: {membraneFound.Wall} is already touched");
+            throw new MembraneAlreadyTouchedException($"Membrane with coordinates: {membraneFound.Coordinates} is already touched");
         }
 
         game = game with
@@ -119,11 +123,20 @@ public static class GameHelper
             }
         };
 
-        var conquerableCellsConnectedToMembraneWall = game.Board.Cells
-            .Where(cell => cell.Coordinates.Any(x => new List<PointF> { selectedWall.First, selectedWall.Second }.Contains(x))
-                           && cell.IsConquered == false
-                           && cell.Coordinates.All(wall =>
-                               game.Board.Membranes.FirstOrDefault(membrane => membrane.Coordinates.Contains(wall)).IsTouched)) // TODO Figure out why game is 'Captured variable is modified in the outer scope'
+        bool AreAllMembranesWithSameCoordinatesAsCellTouched(IReadOnlyList<PointF> coordinates)
+        {
+            return coordinates.Select((coordinate, index) => new List<PointF> { coordinate, coordinates[(index + 1) % coordinates.Count] })
+                .All(wall =>
+                        game.Board.Membranes.FirstOrDefault(membrane => wall.All(membrane.Coordinates.Contains) && membrane.Coordinates.All(wall.Contains)).IsTouched
+                    // TODO Figure out why game is 'Captured variable is modified in the outer scope'
+                );
+        }
+
+        var conquerableCellsConnectedToMembraneWall = game.Board.Cells.Where(cell =>
+                selectedWall.All(cell.Coordinates.Contains)
+                && cell.IsConquered == false
+                && AreAllMembranesWithSameCoordinatesAsCellTouched(cell.Coordinates)
+            )
             .ToImmutableList();
         if (conquerableCellsConnectedToMembraneWall.IsEmpty)
         {
@@ -141,7 +154,7 @@ public static class GameHelper
                 Cells = game.Board.Cells
                     .Select(cell =>
                         conquerableCellsConnectedToMembraneWall
-                            .Any(conquerableCell => conquerableCell.Coordinates == cell.Coordinates)
+                            .Any(conquerableCell => conquerableCell.Coordinates.Equals(cell.Coordinates))
                             ? cell with
                             {
                                 ConqueredBy = playerName

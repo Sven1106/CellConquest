@@ -8,9 +8,3 @@ public class InsufficientPlayersException : ArgumentException
     {
     }
 }
-public class NotAuthorizedException : ArgumentException
-{
-    public NotAuthorizedException(string message) : base(message)
-    {
-    }
-}

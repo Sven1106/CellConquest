@@ -14,7 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12" />
-        <PackageReference Include="EpForceDirectedGraph.cs" Version="1.0.0" />
+<!--        <PackageReference Include="EpForceDirectedGraph.cs" Version="1.0.0" />-->
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="QuikGraph.Data" Version="2.3.0" />
         <PackageReference Include="QuikGraph.Graphviz" Version="2.3.1" />

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using CellConquest.Domain.Entities;
 using CellConquest.Domain.Exceptions;
 using CellConquest.Domain.Helpers;
 using CellConquest.Domain.Models;

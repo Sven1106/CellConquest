@@ -5,19 +5,17 @@ VisualStudioVersion = 17.0.31612.314
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellConquest.Domain", "CellConquest.Domain\CellConquest.Domain.csproj", "{90B435DD-6A93-44C9-8A83-1105DF1DFC61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{8C8A758A-4F77-47E2-A7FE-1C6553C5E8DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "CellConquest.API\ConsoleApp\ConsoleApp.csproj", "{8C8A758A-4F77-47E2-A7FE-1C6553C5E8DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellConquest.Unittests", "CellConquest.Unittests\CellConquest.Unittests.csproj", "{4265E7DB-0ACE-4178-8A32-884572D72B3B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloFunctions", "HelloFunctions\HelloFunctions.csproj", "{6F35400C-8635-4F4E-96A5-A02F93B6DDE3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloFunctions", "CellConquest.API\HelloFunctions\HelloFunctions.csproj", "{6F35400C-8635-4F4E-96A5-A02F93B6DDE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellConquest.Infrastructure", "CellConquest.Infrastructure\CellConquest.Infrastructure.csproj", "{A29EA841-131E-46D4-B97D-A7BD8499719B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CellConquest.API", "CellConquest.API", "{F7947641-54B0-4049-A229-6EA94F252501}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CellConquest.Api", "CellConquest.Api", "{4C4715E6-CA95-49E1-AE7F-38ABAC31D696}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateGameFunction", "CellConquest.API\CreateGameFunction\CreateGameFunction.csproj", "{08E1E942-B72F-4FB3-B3FD-901214C7F09A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{7F908AD6-B5A8-4AFF-B24B-0B3439E19AED}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellConquest.Shared.Abstractions", "CellConquest.Shared.Abstractions\CellConquest.Shared.Abstractions.csproj", "{F1A9FA0B-5AB5-4C1A-A2E7-EC69E513FB50}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CellConquest.API.Shared", "CellConquest.API\CellConquest.API.Shared\CellConquest.API.Shared.csproj", "{5501F0B4-2D48-4A4F-BEBB-4B9AEA1A8331}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,14 +39,14 @@ Global
 		{6F35400C-8635-4F4E-96A5-A02F93B6DDE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F35400C-8635-4F4E-96A5-A02F93B6DDE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F35400C-8635-4F4E-96A5-A02F93B6DDE3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A29EA841-131E-46D4-B97D-A7BD8499719B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A29EA841-131E-46D4-B97D-A7BD8499719B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A29EA841-131E-46D4-B97D-A7BD8499719B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A29EA841-131E-46D4-B97D-A7BD8499719B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F1A9FA0B-5AB5-4C1A-A2E7-EC69E513FB50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F1A9FA0B-5AB5-4C1A-A2E7-EC69E513FB50}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F1A9FA0B-5AB5-4C1A-A2E7-EC69E513FB50}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F1A9FA0B-5AB5-4C1A-A2E7-EC69E513FB50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08E1E942-B72F-4FB3-B3FD-901214C7F09A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08E1E942-B72F-4FB3-B3FD-901214C7F09A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08E1E942-B72F-4FB3-B3FD-901214C7F09A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08E1E942-B72F-4FB3-B3FD-901214C7F09A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5501F0B4-2D48-4A4F-BEBB-4B9AEA1A8331}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5501F0B4-2D48-4A4F-BEBB-4B9AEA1A8331}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5501F0B4-2D48-4A4F-BEBB-4B9AEA1A8331}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5501F0B4-2D48-4A4F-BEBB-4B9AEA1A8331}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,8 +55,9 @@ Global
 		SolutionGuid = {B757ABFC-6838-4687-8004-27AB2445E006}
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{6F35400C-8635-4F4E-96A5-A02F93B6DDE3} = {4C4715E6-CA95-49E1-AE7F-38ABAC31D696}
-		{8C8A758A-4F77-47E2-A7FE-1C6553C5E8DB} = {4C4715E6-CA95-49E1-AE7F-38ABAC31D696}
-		{F1A9FA0B-5AB5-4C1A-A2E7-EC69E513FB50} = {7F908AD6-B5A8-4AFF-B24B-0B3439E19AED}
+		{8C8A758A-4F77-47E2-A7FE-1C6553C5E8DB} = {F7947641-54B0-4049-A229-6EA94F252501}
+		{6F35400C-8635-4F4E-96A5-A02F93B6DDE3} = {F7947641-54B0-4049-A229-6EA94F252501}
+		{08E1E942-B72F-4FB3-B3FD-901214C7F09A} = {F7947641-54B0-4049-A229-6EA94F252501}
+		{5501F0B4-2D48-4A4F-BEBB-4B9AEA1A8331} = {F7947641-54B0-4049-A229-6EA94F252501}
 	EndGlobalSection
 EndGlobal

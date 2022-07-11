@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
-using CellConquest.Domain.Exceptions;
+﻿using CellConquest.Domain.Exceptions;
 using CellConquest.Domain.Models;
 
 namespace CellConquest.Domain.ValueObjects;
 
 public record PlayerName
 {
-    private readonly string _value;
+    private string Value { get; }
 
-    public PlayerName(string value)
+    private PlayerName(string value)
     {
         var trimmedValue = value.Trim();
         if (string.IsNullOrWhiteSpace(trimmedValue))
@@ -21,9 +20,9 @@ public record PlayerName
             throw new InvalidPlayerNameException();
         }
 
-        _value = trimmedValue;
+        Value = trimmedValue;
     }
 
-    public static implicit operator string(PlayerName playerName) => playerName._value;
+    public static implicit operator string(PlayerName playerName) => playerName.Value;
     public static implicit operator PlayerName(string playerName) => new(playerName);
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using CellConquest.Domain.Entities;
 using CellConquest.Domain.Exceptions;
 using CellConquest.Domain.Helpers;
 using CellConquest.Domain.Models;
@@ -54,7 +53,7 @@ public class TouchingAMembrane
         var gameStates = Enum.GetValues(typeof(GameState)).Cast<GameState>();
         foreach (var gameState in gameStates.Where(x => x != GameState.Playing))
         {
-            Assert.Throws<InvalidGameStateException>(() => GameHelper.TouchMembraneOnGame(game with { GameState = gameState }, playerName, firstMembrane.Wall));
+            Assert.Throws<InvalidGameStateException>(() => GameHelper.TouchMembraneOnGame(game with { GameState = gameState }, playerName, firstMembrane.Coordinates));
         }
     }
 
@@ -72,7 +71,7 @@ public class TouchingAMembrane
             Players = game.Players.Add(playerName),
             CurrentPlayerTurn = owner
         };
-        Assert.Throws<IncorrectPlayerTurnException>(() => GameHelper.TouchMembraneOnGame(game, playerName, firstMembrane.Wall));
+        Assert.Throws<IncorrectPlayerTurnException>(() => GameHelper.TouchMembraneOnGame(game, playerName, firstMembrane.Coordinates));
     }
 
     [Fact]
@@ -81,7 +80,7 @@ public class TouchingAMembrane
         const string playerName = "steven";
         var gameConfig = new GameConfig("Test", "svend", TwoByTwo);
         var game = new Game(gameConfig);
-        var wall = new Wall(new PointF(-1,-1), new PointF());
+        var wall = new[] { new PointF(-1, -1), new PointF() };
         game = game with
         {
             GameState = GameState.Playing,
@@ -113,7 +112,7 @@ public class TouchingAMembrane
             }
         };
 
-        Assert.Throws<MembraneAlreadyTouchedException>(() => GameHelper.TouchMembraneOnGame(game, playerName, modifiedMembrane.Wall));
+        Assert.Throws<MembraneAlreadyTouchedException>(() => GameHelper.TouchMembraneOnGame(game, playerName, modifiedMembrane.Coordinates));
     }
 
     [Fact]
@@ -137,7 +136,7 @@ public class TouchingAMembrane
             }
         };
 
-        game = GameHelper.TouchMembraneOnGame(game, playerName, firstMembrane.Wall);
+        game = GameHelper.TouchMembraneOnGame(game, playerName, firstMembrane.Coordinates);
         firstMembrane = game.Board.Membranes.First();
         Assert.True(firstMembrane.IsTouched);
         Assert.Equal(playerName, firstMembrane.TouchedBy);
@@ -163,7 +162,7 @@ public class TouchingAMembrane
                 })
             }
         };
-        game = GameHelper.TouchMembraneOnGame(game, playerName, firstMembrane.Wall);
+        game = GameHelper.TouchMembraneOnGame(game, playerName, firstMembrane.Coordinates);
         Assert.NotEqual<PlayerName>(playerName, game.CurrentPlayerTurn);
     }
 
@@ -190,7 +189,7 @@ public class TouchingAMembrane
             }
         };
 
-        game = GameHelper.TouchMembraneOnGame(game, playerName, thirdMembrane.Wall);
+        game = GameHelper.TouchMembraneOnGame(game, playerName, thirdMembrane.Coordinates);
         var firstCell = game.Board.Cells.First();
 
         Assert.True(firstCell.IsConquered);
@@ -211,7 +210,7 @@ public class ConqueringACell
             GameState = GameState.Playing
         };
         var secondMembrane = game.Board.Membranes[1];
-        game = GameHelper.TouchMembraneOnGame(game, playerName, secondMembrane.Wall);
+        game = GameHelper.TouchMembraneOnGame(game, playerName, secondMembrane.Coordinates);
         Assert.Equal(GameState.Finished, game.GameState);
     }
 }

@@ -1,7 +1,8 @@
 ﻿namespace CellConquest.API.Shared
 {
-    public class StaticFirestoreValues
+    public static class StaticFirestoreValues
     {
-        
+        public static string ProjectId = "cellconquest";
+        public static string GameCollection = "games";
     }
 }

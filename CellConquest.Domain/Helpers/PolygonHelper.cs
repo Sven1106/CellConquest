@@ -2,20 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
-using CellConquest.Domain.Models;
-using CellConquest.Domain.ValueObjects;
 
 namespace CellConquest.Domain.Helpers;
 
 public static class PolygonHelper
 {
-    public static RectangleF GetBounds(List<PointF> polygon)
+    public static RectangleF GetBounds(PointF[] polygon)
     {
         float biggestX = default;
         float biggestY = default;
         float smallestX = default;
         float smallestY = default;
-        for (var i = 0; i < polygon.Count; i++)
+        for (var i = 0; i < polygon.Length; i++)
         {
             var currentPoint = polygon[i];
             if (i == 0)
@@ -173,12 +171,12 @@ public static class PolygonHelper
         new PointF(p3.X + dx34 * t2, p3.Y + dy34 * t2);
     }
 
-    public static bool IsSegmentOnPolygon(Wall wall, PointF[] polygon)
+    public static bool IsEdgeOnPolygon(PointF[] wall, PointF[] polygon)
     {
-        bool IsSegmentOnSegment(Wall segment1, Wall segment2)
+        bool IsSegmentOnSegment(IReadOnlyList<PointF> segment1, IReadOnlyList<PointF> segment2)
         {
-            float GetSlopeOfSegment(Wall segment) =>
-                (segment.Second.Y - segment.First.Y) / (segment.Second.X - segment.First.X);
+            float GetSlopeOfSegment(IReadOnlyList<PointF> segment) =>
+                (segment[1].Y - segment[0].Y) / (segment[1].X - segment[0].X);
 
             var areSegmentsCollinear = GetSlopeOfSegment(segment1) == GetSlopeOfSegment(segment2);
             if (areSegmentsCollinear == false)
@@ -186,21 +184,21 @@ public static class PolygonHelper
                 return false;
             }
 
-            return segment1.First.X <= Math.Max(segment2.First.X, segment2.Second.X) &&
-                   segment1.First.X >= Math.Min(segment2.First.X, segment2.Second.X) &&
-                   segment1.First.Y <= Math.Max(segment2.First.Y, segment2.Second.Y) &&
-                   segment1.First.Y >= Math.Min(segment2.First.Y, segment2.Second.Y) &&
-                   segment1.Second.X <= Math.Max(segment2.First.X, segment2.Second.X) &&
-                   segment1.Second.X >= Math.Min(segment2.First.X, segment2.Second.X) &&
-                   segment1.Second.Y <= Math.Max(segment2.First.Y, segment2.Second.Y) &&
-                   segment1.Second.Y >= Math.Min(segment2.First.Y, segment2.Second.Y);
+            return segment1[0].X <= Math.Max(segment2[0].X, segment2[1].X) &&
+                   segment1[0].X >= Math.Min(segment2[0].X, segment2[1].X) &&
+                   segment1[0].Y <= Math.Max(segment2[0].Y, segment2[1].Y) &&
+                   segment1[0].Y >= Math.Min(segment2[0].Y, segment2[1].Y) &&
+                   segment1[1].X <= Math.Max(segment2[0].X, segment2[1].X) &&
+                   segment1[1].X >= Math.Min(segment2[0].X, segment2[1].X) &&
+                   segment1[1].Y <= Math.Max(segment2[0].Y, segment2[1].Y) &&
+                   segment1[1].Y >= Math.Min(segment2[0].Y, segment2[1].Y);
         }
 
         var isSegmentOnPolygon = false;
         for (var i = 0; i < polygon.Length; i++) //Check if wall is on any polygon segments
         {
             var next = (i + 1) % polygon.Length;
-            var polygonSegment = new Wall(polygon[i], polygon[next]);
+            var polygonSegment = new[] { polygon[i], polygon[next] };
 
             isSegmentOnPolygon = IsSegmentOnSegment(wall, polygonSegment);
             if (isSegmentOnPolygon)

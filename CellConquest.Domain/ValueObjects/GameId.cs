@@ -4,9 +4,9 @@ namespace CellConquest.Domain.ValueObjects;
 
 public record GameId
 {
-    public string Value { get; }
+    private string Value { get; }
 
-    public GameId(string value)
+    private GameId(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
