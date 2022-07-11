@@ -2,8 +2,23 @@
 
 namespace CellConquest.Domain.Models;
 
+public class Map
+{
+    public string Name { get; }
+    public PointF[] Coordinates { get; }
+
+    public Map(string name, PointF[] coordinates)
+    {
+        Name = name;
+        Coordinates = coordinates;
+    }
+}
+
 public static class Maps
 {
+    public PointF[] Maps { get; }
+    
+    
     public static PointF[] Test { get; } =
     {
         new(1, 1),
