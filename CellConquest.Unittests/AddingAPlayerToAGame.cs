@@ -53,6 +53,6 @@ public class AddingAPlayerToAGame
         var gameConfig = new GameConfig("Test", "svend", TwoByTwo);
         var game = new Game(gameConfig);
         game = GameHelper.AddPlayerToGame(game, playerName);
-        Assert.Contains<PlayerName>(playerName, game.Players);
+        Assert.Contains<string>(playerName, game.Players);
     }
 }

@@ -1,31 +1,54 @@
 {
-  "name": "functions",
-  "scripts": {
-    "lint": "eslint --ext .js,.ts .",
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "serve": "npm run build && firebase emulators:start --only functions",
-    "shell": "npm run build && firebase functions:shell",
-    "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
-  },
-  "engines": {
-    "node": "16"
-  },
-  "main": "lib/index.js",
-  "dependencies": {
-    "firebase-admin": "^10.0.2",
-    "firebase-functions": "^3.18.0"
-  },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.12.0",
-    "@typescript-eslint/parser": "^5.12.0",
-    "eslint": "^8.9.0",
-    "eslint-config-google": "^0.14.0",
-    "eslint-plugin-import": "^2.25.4",
-    "firebase-functions-test": "^0.2.0",
-    "typescript": "^4.5.4"
-  },
-  "private": true
+    "name": "functions",
+    "scripts": {
+        "build": "tsc",
+        "build:watch": "tsc --watch",
+        "serve": "npm run build && firebase emulators:start --only functions  --inspect-functions",
+        "shell": "npm run build && firebase functions:shell",
+        "start": "npm run shell",
+        "deploy": "firebase deploy --only functions",
+        "logs": "firebase functions:log"
+    },
+    "engines": {
+        "node": "16"
+    },
+    "main": "lib/src/index.js",
+    "dependencies": {
+        "@trpc/server": "^10.0.0-alpha.38",
+        "@types/lodash": "^4.14.182",
+        "express": "^4.18.1",
+        "firebase-admin": "^10.2.0",
+        "firebase-functions": "^3.21.0",
+        "geometric": "^2.2.10",
+        "lodash": "^4.17.21",
+        "zod": "^3.17.10",
+        "zod-express-middleware": "^1.4.0"
+    },
+    "devDependencies": {
+        "@trivago/prettier-plugin-sort-imports": "^3.3.0",
+        "@types/geometric": "^2.2.0",
+        "@types/node": "^14.11.2",
+        "prettier": "^2.7.1",
+        "typescript": "^4.0.3"
+    },
+    "private": true,
+    "prettier": {
+        "printWidth": 150,
+        "tabWidth": 4,
+        "useTabs": false,
+        "semi": true,
+        "importOrder": [
+            "^@core/(.*)$",
+            "^@server/(.*)$",
+            "^@ui/(.*)$",
+            "^[./]"
+        ],
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "bracketSpacing": true,
+        "arrowParens": "avoid",
+        "proseWrap": "preserve",
+        "endOfLine": "lf",
+        "importOrderCaseInsensitive": true
+    }
 }
