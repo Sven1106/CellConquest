@@ -2,30 +2,21 @@ import { z } from 'zod';
 import { Schema } from './schemas';
 
 export namespace Domain {
-    export type Coordinate = z.infer<typeof Schema.coordinate>;
-
-    export type GameState = z.infer<typeof Schema.gameState>;
-
-    export type GameValues = z.infer<typeof Schema.gameValues>;
-
-    export type GameActions = z.infer<typeof Schema.gameActionsDto>;
-
-    export type MembraneActions = z.infer<typeof Schema.membraneActionsDto>;
-
-    export type Player = z.infer<typeof Schema.player>;
-
-    export type Cell = z.infer<typeof Schema.cell>;
-
-    export type Membrane = z.infer<typeof Schema.membrane>;
-
-    export type GameConfig = z.infer<typeof Schema.gameConfig>;
-
-    export type Game = z.infer<typeof Schema.game>;
+    export type GameConfig = z.infer<typeof Schema.Domain.gameConfig>;
+    export type Game = z.infer<typeof Schema.Domain.game>;
+    export type Player = z.infer<typeof Schema.Domain.player>;
+    export type GameState = z.infer<typeof Schema.Domain.gameState>;
+    export type CurrentPlayer = z.infer<typeof Schema.Domain.currentPlayer>;
+    export type Membrane = z.infer<typeof Schema.Domain.membrane>;
+    export type Coordinate = z.infer<typeof Schema.Domain.coordinate>;
+    export type Cell = z.infer<typeof Schema.Domain.cell>;
 }
-
-export namespace DTO {
-    export type Game = z.infer<typeof Schema.gameDto>;
-    export type GameAction = z.infer<typeof Schema.gameActionDto>;
-    export type Membrane = z.infer<typeof Schema.membraneDto>;
-    export type MembraneAction = z.infer<typeof Schema.membraneActionDto>;
+export namespace API {
+    export type Game = z.infer<typeof Schema.API.game>;
+    export type GameForList = z.infer<typeof Schema.API.gameForList>;
+    export type GameActionType = z.infer<typeof Schema.API.gameActionType>;
+    export type GameAction = z.infer<typeof Schema.API.gameAction>;
+    export type Membrane = z.infer<typeof Schema.API.membrane>;
+    export type MembraneActionType = z.infer<typeof Schema.API.membraneActionType>;
+    export type MembraneAction = z.infer<typeof Schema.API.membraneAction>;
 }

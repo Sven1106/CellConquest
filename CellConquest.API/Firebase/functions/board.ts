@@ -1,13 +1,11 @@
 import { Point, polygonBounds, polygonInPolygon, Line, lineIntersectsPolygon, polygonScale, pointOnPolygon } from 'geometric';
 import { Domain } from './types';
 
-export const createCellsAndMembranesForASquareGrid = (
-    coordinatesasdas: Domain.Coordinate[]
-): { cells: Domain.Cell[]; membranes: Domain.Membrane[] } => {
+export const createCellsAndMembranesForASquareGrid = (coordinates: Domain.Coordinate[]): { cells: Domain.Cell[]; membranes: Domain.Membrane[] } => {
     // This is tightly coupled to a 4 wall grid.
     let cells: Domain.Cell[] = [];
     let membranes: Domain.Membrane[] = [];
-    const points: Point[] = coordinatesToPoints(coordinatesasdas);
+    const points: Point[] = coordinatesToPoints(coordinates);
     const bound = polygonBounds(points);
     if (!bound) {
         throw new Error('PolygonBound was null');
@@ -30,9 +28,7 @@ export const createCellsAndMembranesForASquareGrid = (
                     predictedCoordinatesForCell[index],
                     predictedCoordinatesForCell[(index + 1) % predictedCoordinatesForCell.length],
                 ];
-                let membrane: Domain.Membrane | undefined = membranes.find(m =>
-                    coordinatesToPoints(m.coordinates).every(y => edge.every(x => x === y))
-                );
+                let membrane: Domain.Membrane | undefined = membranes.find(m => coordinatesToPoints(m.coordinates).every(y => edge.every(x => x === y)));
                 if (!membrane) {
                     const isEdgeAnOutline = lineIntersectsPolygon(edge, points) && pointOnPolygon(edge[0], points) && pointOnPolygon(edge[1], points);
                     let markMembraneAsOutline = isEdgeAnOutline;
@@ -41,7 +37,10 @@ export const createCellsAndMembranesForASquareGrid = (
                         const isAnyCoordinateOfParallelCellInvalid = !polygonInPolygon(coordinatesOfParallelCell, scaledPolygon);
                         markMembraneAsOutline = isAnyCoordinateOfParallelCellInvalid;
                     }
-                    membrane = { coordinates: pointsToCoordinates(edge), touchedBy: markMembraneAsOutline ? 'board' : 'noOne' };
+                    membrane = {
+                        coordinates: pointsToCoordinates(edge),
+                        touchedBy: markMembraneAsOutline ? 'board' : 'noOne',
+                    };
                     newMembranes.push(membrane);
                 }
                 membranesWithSameCoordinatesAsCell.push(membrane);
@@ -50,7 +49,13 @@ export const createCellsAndMembranesForASquareGrid = (
                 // Skips a cell if it is already captured
                 continue;
             }
-            cells = [...cells, { coordinates: pointsToCoordinates(predictedCoordinatesForCell), conqueredBy: 'noOne' }];
+            cells = [
+                ...cells,
+                {
+                    coordinates: pointsToCoordinates(predictedCoordinatesForCell),
+                    conqueredBy: 'noOne',
+                },
+            ];
             membranes = [...membranes, ...newMembranes];
         }
     }

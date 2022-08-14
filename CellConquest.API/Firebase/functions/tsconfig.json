@@ -2,6 +2,8 @@
     "compilerOptions": {
         "module": "commonjs",
         "noImplicitReturns": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
         "noUnusedLocals": true,
         "outDir": "lib",
         "sourceMap": true,
@@ -10,5 +12,5 @@
         "esModuleInterop": true
     },
     "compileOnSave": true,
-    "include": ["src/**/*.ts", "test/**/*.ts", "types.ts"]
+    "include": ["src/**/*.ts", "test/**/*.ts", "../server/types.ts"]
 }
