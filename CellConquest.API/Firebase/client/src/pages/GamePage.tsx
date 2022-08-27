@@ -39,12 +39,14 @@ const Game = ({ gameId }: { gameId: string }) => {
     }
   };
   const scale = 100;
+  const offset = 0.1;
   return (
     <>
       {JSON.stringify(data)}
       <Stage
         width={500}
         height={500}
+        translate="yes"
         options={{
           antialias: true,
           autoDensity: true,
@@ -56,7 +58,6 @@ const Game = ({ gameId }: { gameId: string }) => {
             <>
               <Text
                 text="hi"
-                anchor={0.5}
                 x={cell.coordinates[0].x + scale / 2}
                 y={cell.coordinates[0].y + scale / 2}
                 style={{
@@ -70,10 +71,10 @@ const Game = ({ gameId }: { gameId: string }) => {
                 draw={(g) => {
                   g.beginFill(Math.random() * 0xffffff, 0.5);
                   g.drawRoundedRect(
-                    cell.coordinates[0].x + 0.1,
-                    cell.coordinates[0].y + 0.1,
-                    1 - 0.2,
-                    1 - 0.2,
+                    cell.coordinates[0].x + offset,
+                    cell.coordinates[0].y + offset,
+                    1,
+                    1,
                     0
                   );
                   g.endFill();
@@ -83,9 +84,12 @@ const Game = ({ gameId }: { gameId: string }) => {
           );
         })}
         {data.membranes.map((membrane) => {
-          function doStuff(e: any) {
-            return <Graphics />;
-          }
+          const slopeOfMembrane =
+            (membrane.coordinates[1].y - membrane.coordinates[0].y) /
+            (membrane.coordinates[1].x - membrane.coordinates[0].x);
+          console.log(
+            JSON.stringify(membrane.coordinates) + " is " + slopeOfMembrane
+          );
           return (
             <Graphics
               key={JSON.stringify(membrane.coordinates)}
@@ -99,37 +103,31 @@ const Game = ({ gameId }: { gameId: string }) => {
               buttonMode
               scale={scale}
               draw={(g) => {
-                const slopeOfMembrane =
-                  (membrane.coordinates[1].y - membrane.coordinates[0].y) /
-                  (membrane.coordinates[1].x - membrane.coordinates[0].x);
-                const [x1, y1, x2, y2] = [
+                g.beginFill(Math.random() * 0xffffff, 1);
+                g.drawRoundedRect(
+                  membrane.coordinates[
+                    Object.is(slopeOfMembrane, 0) ||
+                    Object.is(slopeOfMembrane, Infinity)
+                      ? 0
+                      : 1
+                  ].x +
+                    offset / 2,
+                  membrane.coordinates[
+                    Object.is(slopeOfMembrane, 0) ||
+                    Object.is(slopeOfMembrane, Infinity)
+                      ? 0
+                      : 1
+                  ].y +
+                    offset / 2,
                   Object.is(slopeOfMembrane, 0) ||
-                  Object.is(slopeOfMembrane, Infinity)
-                    ? -0.1
-                    : 0.1,
+                    Object.is(slopeOfMembrane, -0)
+                    ? 1.1
+                    : offset,
                   Object.is(slopeOfMembrane, Infinity) ||
-                  Object.is(slopeOfMembrane, -0)
-                    ? -0.1
-                    : 0.1,
-                  Object.is(slopeOfMembrane, Infinity) ||
-                  Object.is(slopeOfMembrane, -0)
-                    ? -0.1
-                    : 0.1,
-                  Object.is(slopeOfMembrane, -0) ||
-                  Object.is(slopeOfMembrane, -Infinity)
-                    ? -0.1
-                    : 0.1,
-                ];
-                g.beginFill(Math.random() * 0xffffff, 0.5);
-                g.moveTo(membrane.coordinates[0].x, membrane.coordinates[0].y);
-                g.lineTo(membrane.coordinates[1].x, membrane.coordinates[1].y);
-                g.lineTo(
-                  membrane.coordinates[1].x + x1,
-                  membrane.coordinates[1].y + y1
-                );
-                g.lineTo(
-                  membrane.coordinates[0].x + x2,
-                  membrane.coordinates[0].y + y2
+                    Object.is(slopeOfMembrane, -Infinity)
+                    ? 1.1
+                    : offset,
+                  0
                 );
 
                 g.endFill();
@@ -137,6 +135,98 @@ const Game = ({ gameId }: { gameId: string }) => {
             />
           );
         })}
+        {/* <Graphics
+          key={JSON.stringify(data.membranes[0].coordinates)}
+          interactive
+          pointerover={(e: InteractionEvent) => {
+            e.currentTarget.scale.set(scale);
+          }}
+          pointerout={(e: InteractionEvent) => {
+            e.currentTarget.scale.set(scale);
+          }}
+          buttonMode
+          scale={scale}
+          draw={(g) => {
+            g.beginFill(Math.random() * 0xffffff, 0.5);
+            g.drawRoundedRect(
+              data.membranes[0].coordinates[0].x + offset / 2,
+              data.membranes[0].coordinates[0].y + offset / 2,
+              1.1,
+              offset,
+              1
+            );
+            g.endFill();
+          }}
+        />
+        <Graphics
+          key={JSON.stringify(data.membranes[1].coordinates)}
+          interactive
+          pointerover={(e: InteractionEvent) => {
+            e.currentTarget.scale.set(scale);
+          }}
+          pointerout={(e: InteractionEvent) => {
+            e.currentTarget.scale.set(scale);
+          }}
+          buttonMode
+          scale={scale}
+          draw={(g) => {
+            g.beginFill(Math.random() * 0xffffff, 0.5);
+            g.drawRoundedRect(
+              data.membranes[1].coordinates[0].x + offset / 2,
+              data.membranes[1].coordinates[0].y + offset / 2,
+              offset,
+              1.1,
+              1
+            );
+            g.endFill();
+          }}
+        />
+        <Graphics
+          key={JSON.stringify(data.membranes[2].coordinates)}
+          interactive
+          pointerover={(e: InteractionEvent) => {
+            e.currentTarget.scale.set(scale);
+          }}
+          pointerout={(e: InteractionEvent) => {
+            e.currentTarget.scale.set(scale);
+          }}
+          buttonMode
+          scale={scale}
+          draw={(g) => {
+            g.beginFill(Math.random() * 0xffffff, 0.5);
+            g.drawRoundedRect(
+              data.membranes[2].coordinates[1].x + offset / 2,
+              data.membranes[2].coordinates[1].y + offset / 2,
+              1.1,
+              offset,
+              1
+            );
+            g.endFill();
+          }}
+        />
+        <Graphics
+          key={JSON.stringify(data.membranes[3].coordinates)}
+          interactive
+          pointerover={(e: InteractionEvent) => {
+            e.currentTarget.scale.set(scale);
+          }}
+          pointerout={(e: InteractionEvent) => {
+            e.currentTarget.scale.set(scale);
+          }}
+          buttonMode
+          scale={scale}
+          draw={(g) => {
+            g.beginFill(Math.random() * 0xffffff, 0.5);
+            g.drawRoundedRect(
+              data.membranes[3].coordinates[1].x + offset / 2,
+              data.membranes[3].coordinates[1].y + offset / 2,
+              offset,
+              1.1,
+              1
+            );
+            g.endFill();
+          }}
+        /> */}
         <Graphics
           scale={1}
           interactive
@@ -146,7 +236,7 @@ const Game = ({ gameId }: { gameId: string }) => {
             g.drawRect(50, 250, 120, 120);
 
             g.lineStyle(2, 0xff00ff, 1);
-            g.beginFill(0xff00bb, 0.25);
+            g.beginFill(0xff00bb, offset * 25);
             g.drawRoundedRect(250, 200, 200, 200, 15);
             g.endFill();
 
